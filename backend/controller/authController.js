@@ -42,10 +42,8 @@ export const signup = async (req, res) => {
                     fullName: newUser.fullName,
                     username: newUser.username,
                     email: newUser.email,
-                    followers: newUser.followers,
-                    following: newUser.following,
+                    friends: newUser.friends,
                     profileImg: newUser.profileImg,
-                    coverImg: newUser.coverImg,
                     message: "User created successfully", savedUser });
           }
           else{
@@ -78,10 +76,8 @@ export const login = async (req, res) => {
                fullName: user.fullName,
                username: user.username,
                email: user.email,
-               followers: user.followers,
-               following: user.following,
+               friends: user.friends,
                profileImg: user.profileImg,
-               coverImg: user.coverImg
           });
 
      }

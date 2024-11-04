@@ -25,15 +25,7 @@ const userSchema = new mongoose.Schema({
           minlength: 6
      },
 
-     followers: [
-          {
-               type: mongoose.Schema.Types.ObjectId,
-               ref: 'User',
-               default: []
-          }
-     ],
-
-     following: [
+     friends: [
           {
                type: mongoose.Schema.Types.ObjectId,
                ref: 'User',
@@ -42,11 +34,6 @@ const userSchema = new mongoose.Schema({
      ],
 
      profileImg: {
-          type: String,
-          default: ''
-     },
-
-     coverImg: {
           type: String,
           default: ''
      },
