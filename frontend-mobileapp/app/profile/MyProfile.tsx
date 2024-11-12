@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 
@@ -17,6 +17,19 @@ const books: Book[] = [
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
+
+  const handleAddBook = () => {
+    Alert.alert(
+      "How do you want to add your books?",
+      "",
+      [
+        { text: "Manually", onPress: () => console.log("Add manually") },
+        { text: "ISBN Scan", onPress: () => console.log("ISBN scan") },
+        { text: "Cancel", style: "cancel" }
+      ],
+      { cancelable: true }
+    );
+  };
 
   const renderBookItem = ({ item }: { item: Book }) => (
     <View style={styles.bookItem}>
@@ -74,7 +87,7 @@ const ProfileScreen = () => {
         <TouchableOpacity>
           <Text style={styles.navItem}>Lent</Text>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleAddBook}>
           <Text style={styles.navItem}>Add+</Text>
         </TouchableOpacity>
       </View>
@@ -220,3 +233,4 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
+
