@@ -1,77 +1,130 @@
 import React, { useState } from 'react';
-import { View, Image, Button, Modal, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { launchImageLibrary, ImagePickerResponse } from 'react-native-image-picker';
+import { View, Text, Button, Image, StyleSheet, FlatList, TouchableOpacity, TouchableHighlight } from 'react-native';
+import * as ImagePicker from 'react-native-image-picker';
+import { Colors } from '@/constants/Colors';
+const ProfilePicSelector = () => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
-export default function ProfilePicture() {
-  const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibrary({
+      mediaType: 'photo',
+      selectionLimit: 0,
+    });
 
-  const handleChoosePhoto = () => {
-    launchImageLibrary(
-      { mediaType: 'photo', maxWidth: 300, maxHeight: 300, quality: 0.5 },
-      (response: ImagePickerResponse) => {
-        if (response.assets && response.assets.length > 0) {
-          setProfileImage(response.assets[0].uri || null);
-        }
-      }
-    );
+    if (result.assets) {
+      const images = result.assets.map(asset => asset.uri);
+      setGalleryImages(images as string[]);
+    }
+  };
+
+  const selectProfilePic = (uri: string) => {
+    setSelectedImage(uri);
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => setModalVisible(true)}>
-        {profileImage ? (
-          <Image source={{ uri: profileImage }} style={styles.profileImage} />
-        ) : (
-          <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>Choose Photo</Text>
-          </View>
-        )}
-      </TouchableOpacity>
+      {/* Cancel and Done buttons */}
+      <View style={styles.header}>
+        <TouchableHighlight style={styles.button} onPress={() => setSelectedImage(null)}>
+          <Text style={styles.buttonText}>Cancel</Text>
+        </TouchableHighlight>
+        <TouchableHighlight style={styles.button} onPress={() => {/* Handle Done action */}}>
+          <Text style={styles.buttonText}>Done</Text>
+        </TouchableHighlight>
+      </View>
 
-      {/* Modal for choosing profile picture */}
-      <Modal
-        transparent={true}
-        visible={modalVisible}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Choose Profile Picture</Text>
-            <Button title="Choose from Gallery" onPress={handleChoosePhoto} />
-            <Button title="Cancel" onPress={() => setModalVisible(false)} color="#888" />
-          </View>
-        </View>
-      </Modal>
+      {/* Selected Pfp Preview */}
+      <View style={styles.preview}>
+        {selectedImage ? (
+          <Image source={{ uri: selectedImage }} style={styles.profileImage} />
+        ) : (
+          <Text style={styles.placeholder}>No Profile Pic Selected</Text>
+        )}
+      </View>
+
+      {/* Gallery Button */}
+      <TouchableHighlight style={styles.galleryButton} onPress={pickImage}>
+        <Text style={styles.buttonText}>Open Gallery</Text>
+      </TouchableHighlight>
+
+      {/* Gallery Images */}
+      <Text style={styles.galleryTitle}>Gallery</Text>
+      <FlatList
+        data={galleryImages}
+        numColumns={3}
+        keyExtractor={(item) => item}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => selectProfilePic(item)}>
+            <Image source={{ uri: item }} style={styles.galleryImage} />
+          </TouchableOpacity>
+        )}
+      />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: { alignItems: 'center', marginTop: 20 },
-  profileImage: { width: 100, height: 100, borderRadius: 50 },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: Colors.savoy,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  preview: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 100, 
+    resizeMode: 'cover',
+  },
   placeholder: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: '#EEE',
+    textAlign: 'center',
+    lineHeight: 200,
+    color: '#555',
+  },
+  galleryButton: {
+    backgroundColor: Colors.savoy,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginBottom: 20,
+    alignSelf: 'center',
+  },
+  galleryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  galleryImage: {
     width: 100,
     height: 100,
-    borderRadius: 50,
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    margin: 5,
+    borderRadius: 50, 
   },
-  placeholderText: { color: '#888', fontSize: 16 },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '80%',
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  modalTitle: { fontSize: 18, marginBottom: 10 },
 });
+
+export default ProfilePicSelector;
