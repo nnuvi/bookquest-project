@@ -10,7 +10,7 @@ export const Colors = {
   green: '#2ecc71',
   gray: '#ccc',
   choco: '#433530',
-
+  savoy : '#6A4E37',
   /*light: {
     text: '#11181C',
     background: '#fff',
