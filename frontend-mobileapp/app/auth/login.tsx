@@ -19,8 +19,8 @@ const Page = () => {
 		password: "",
 	});
      console.log('Current Form Data:', formData);
-
      const router = useRouter();
+     
      const login = async (username: string, password: string ) => {
           try {
                console.log('fdata', { username, password });
@@ -34,7 +34,6 @@ const Page = () => {
                     alert('Invalid username or password');
                }
           } catch (error) {
-               
                console.error('Error during login:', error);
                alert('Invalid username or password');
           }
