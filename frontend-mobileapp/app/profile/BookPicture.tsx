@@ -1,56 +1,128 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Button, Image, StyleSheet, FlatList, TouchableOpacity, TouchableHighlight } from 'react-native';
+import * as ImagePicker from 'react-native-image-picker';
 
-type BookPicProps = {
-  title: string;
-  author: string;
-  cover: string;
-  onPress: () => void;
-};
+const BookCoverSelector = () => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
-export default function BookPicture({ title, author, cover, onPress }: BookPicProps) {
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibrary({
+      mediaType: 'photo',
+      selectionLimit: 0,
+    });
+
+    if (result.assets) {
+      const images = result.assets.map(asset => asset.uri);
+      setGalleryImages(images as string[]);
+    }
+  };
+
+  const selectCover = (uri: string) => {
+    setSelectedImage(uri);
+  };
+
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
-      <Image source={{ uri: cover }} style={styles.cover} />
-      <View style={styles.info}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.author}>by {author}</Text>
+    <View style={styles.container}>
+      {/* Header with Cancel and Done buttons */}
+      <View style={styles.header}>
+        <TouchableHighlight style={styles.button} onPress={() => setSelectedImage(null)}>
+          <Text style={styles.buttonText}>Cancel</Text>
+        </TouchableHighlight>
+        <TouchableHighlight style={styles.button} onPress={() => {/* Handle Done action */}}>
+          <Text style={styles.buttonText}>Done</Text>
+        </TouchableHighlight>
       </View>
-    </TouchableOpacity>
+
+      {/* Selected Book Cover Preview */}
+      <View style={styles.preview}>
+        {selectedImage ? (
+          <Image source={{ uri: selectedImage }} style={styles.image} />
+        ) : (
+          <Text style={styles.placeholder}>No Cover Selected</Text>
+        )}
+      </View>
+
+      {/* Gallery Button */}
+      <TouchableHighlight style={styles.galleryButton} onPress={pickImage}>
+        <Text style={styles.buttonText}>Open Gallery</Text>
+      </TouchableHighlight>
+
+      {/* Gallery Images */}
+      <Text style={styles.galleryTitle}>Gallery</Text>
+      <FlatList
+        data={galleryImages}
+        numColumns={3}
+        keyExtractor={(item) => item}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => selectCover(item)}>
+            <Image source={{ uri: item }} style={styles.galleryImage} />
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    marginBottom: 10,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cover: {
-    width: 50,
-    height: 70,
-    borderRadius: 5,
-    marginRight: 15,
-  },
-  info: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#D2B48C', // Background color to match design
+    padding: 20,
   },
-  title: {
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: '#8B4513', // Dark brown color
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    textAlign: 'center',
   },
-  author: {
-    fontSize: 14,
-    color: '#666',
+  preview: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  image: {
+    width: 150,
+    height: 200,
+    resizeMode: 'cover',
+  },
+  placeholder: {
+    width: 150,
+    height: 200,
+    backgroundColor: '#EEE',
+    textAlign: 'center',
+    lineHeight: 200,
+    color: '#555',
+  },
+  galleryButton: {
+    backgroundColor: '#8B4513', // Dark brown color
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginBottom: 20,
+    alignSelf: 'center',
+  },
+  galleryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  galleryImage: {
+    width: 100,
+    height: 100,
+    margin: 5,
   },
 });
+
+export default BookCoverSelector;
+
