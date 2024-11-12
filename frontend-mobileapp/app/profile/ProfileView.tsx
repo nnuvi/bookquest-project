@@ -1,42 +1,226 @@
-import React from 'react';
-import { View, Text, Image, FlatList, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Colors } from '@/constants/Colors';
 
-const userBooks = [
-  { id: '1', title: 'User Book One', author: 'Author1', cover: 'book_cover_url' },
-  { id: '2', title: 'User Book Two', author: 'Author2', cover: 'book_cover_url' },
+type Book = {
+  id: string;
+  title: string;
+  author: string;
+  image: string;
+};
+
+const books: Book[] = [
+  { id: '1', title: 'Book 1', author: 'Author 1', image: 'https://example.com/book1.jpg' },
+  { id: '2', title: 'Book 2', author: 'Author 2', image: 'https://example.com/book2.jpg' },
 ];
 
-export default function ProfileViewPage() {
+const ProfileView = () => {
+  const navigation = useNavigation();
+  const [isConnected, setIsConnected] = useState(false);
+
+  const handleConnectToggle = () => {
+    setIsConnected(!isConnected);
+  };
+
+  const renderBookItem = ({ item }: { item: Book }) => (
+    <View style={styles.bookItem}>
+      <Image source={{ uri: item.image }} style={styles.bookImage} />
+      <View style={styles.bookDetails}>
+        <Text style={styles.bookTitle}>{item.title}</Text>
+        <Text style={styles.bookAuthor}>{item.author}</Text>
+      </View>
+      <TouchableOpacity style={styles.borrowButton}>
+        <Text style={styles.borrowButtonText}>Borrow</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      {/* Profile Information */}
-      <Image source={{ uri: 'user_profile_image_url' }} style={styles.profileImage} />
-      <Text style={styles.username}>Username</Text>
-      <Text style={styles.bio}>User bio information...</Text>
-
-      {/* User's Book List */}
-      <FlatList
-        data={userBooks}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.bookItem}>
-            <Image source={{ uri: item.cover }} style={styles.bookImage} />
-            <Text style={styles.bookTitle}>{item.title}</Text>
-            <Text style={styles.bookAuthor}>by {item.author}</Text>
+      {/* Profile Section */}
+      <View style={styles.profileSection}>
+        <Image
+          source={{ uri: 'https://example.com/profile-pic.jpg' }}
+          style={styles.profilePic}
+        />
+        <View style={styles.infoBoxes}>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoText}>100</Text>
+            <Text style={styles.infoLabel}>Books</Text>
           </View>
-        )}
+          <TouchableOpacity style={styles.infoBox} onPress={() => navigation.navigate('Friends')}>
+            <Text style={styles.infoText}>19</Text>
+            <Text style={styles.infoLabel}>Friends</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Connect Button Container */}
+      <View style={styles.connectButtonContainer}>
+        <TouchableOpacity 
+          style={[styles.connectButton, isConnected && styles.connectedButton]} 
+          onPress={handleConnectToggle}
+        >
+          <Text style={styles.connectButtonText}>
+            {isConnected ? 'Connected' : 'Connect'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Profile Details */}
+      <View style={styles.profileDetails}>
+        <Text style={styles.name}>Name</Text>
+        <Text style={styles.username}>@username</Text>
+        <Text style={styles.bio}>This is a sample bio.</Text>
+      </View>
+
+      {/* Navigation Bar */}
+      <View style={styles.navBar}>
+        <Text style={[styles.navItem, styles.highlighted]}>Books</Text>
+      </View>
+
+      {/* Book List */}
+      <FlatList
+        data={books}
+        renderItem={renderBookItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.bookList}
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, alignItems: 'center' },
-  profileImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 10 },
-  username: { fontSize: 20, fontWeight: 'bold' },
-  bio: { fontSize: 14, color: 'gray', marginBottom: 10 },
-  bookItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: '#ccc', width: '100%' },
-  bookImage: { width: 50, height: 70, marginRight: 10 },
-  bookTitle: { fontSize: 16, fontWeight: 'bold' },
-  bookAuthor: { fontSize: 14, color: 'gray' },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+  },
+  profileSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  profilePic: {
+    width: 80,
+    height: 80,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: Colors.choco,
+  },
+  infoBoxes: {
+    flexDirection: 'row',
+    marginLeft: 148,
+  },
+  infoBox: {
+    backgroundColor: Colors.choco,
+    padding: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 10,
+    borderRadius: 8,
+    width: 60,
+  },
+  infoText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.background,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: Colors.background,
+  },
+  connectButtonContainer: {
+    alignItems: 'flex-end', 
+    marginBottom: 0, 
+  },
+  connectButton: {
+    position: 'absolute',
+    right: 5,
+    top: 50, 
+    paddingVertical: 5,
+    paddingHorizontal: 25,
+    backgroundColor: Colors.choco,
+    borderRadius: 8,
+  },
+  connectedButton: {
+    backgroundColor: Colors.savoy,
+  },
+  connectButtonText: {
+    color: Colors.background,
+    fontWeight: 'bold',
+  },
+  profileDetails: {
+    marginBottom: 20,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.choco,
+  },
+  username: {
+    fontSize: 16,
+    color: Colors.choco,
+  },
+  bio: {
+    fontSize: 14,
+    color: Colors.choco,
+  },
+  navBar: {
+    flexDirection: 'row',
+    backgroundColor: Colors.choco,
+    padding: 10,
+    justifyContent: 'space-around',
+    marginBottom: 25,
+  },
+  navItem: {
+    fontSize: 16,
+    color: Colors.background,
+  },
+  highlighted: {
+    fontWeight: 'bold',
+    textDecorationLine: 'underline',
+  },
+  bookList: {
+    paddingBottom: 20,
+  },
+  bookItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.choco,
+  },
+  bookImage: {
+    width: 50,
+    height: 75,
+    borderRadius: 5,
+    marginRight: 10,
+    borderColor: Colors.choco,
+  },
+  bookDetails: {
+    flex: 1,
+  },
+  bookTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.choco,
+  },
+  bookAuthor: {
+    fontSize: 14,
+    color: Colors.choco,
+  },
+  borrowButton: {
+    backgroundColor: Colors.choco,
+    padding: 10,
+    borderRadius: 8,
+  },
+  borrowButtonText: {
+    color: Colors.background,
+    fontWeight: 'bold',
+  },
 });
+
+export default ProfileView;
