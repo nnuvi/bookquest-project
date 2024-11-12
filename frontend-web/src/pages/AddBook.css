@@ -1,0 +1,8 @@
+/* src/pages/AddBook.css */
+
+.add-book-container {
+    padding: 40px;
+    max-width: 600px;
+    margin: auto;
+    background-color: #fff;
+}
