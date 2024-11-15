@@ -56,8 +56,10 @@ export default function RootLayout() {
             backgroundColor: colorScheme === 'dark' ? '#333' : '#fff',
           },
           headerBackVisible: false,
-          
           }} />
+          <Stack.Screen name="profile/Homepage" options={{ headerShown: false }} />
+          <Stack.Screen name="profile/MyProfile" options={{ headerShown: false }} />
+          <Stack.Screen name="profile/Myborrowed" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

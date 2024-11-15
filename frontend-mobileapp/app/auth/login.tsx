@@ -15,9 +15,9 @@ const Page = () => {
      const [username, setUsername] = useState('');
      const [password, setPassword] = useState('');
      const [formData, setFormData] = useState({
-		username: "",
-		password: "",
-	});
+		  username: "",
+		  password: "",
+	  });
      console.log('Current Form Data:', formData);
      const router = useRouter();
      
@@ -29,7 +29,7 @@ const Page = () => {
                console.log('res data', res.data);
                console.log('status',res.status);
                if(res.status === 200) {
-                    router.push('../profile/viewMyProfile');
+                    router.push('../profile/Homepage');
                } else {
                     alert('Invalid username or password');
                }

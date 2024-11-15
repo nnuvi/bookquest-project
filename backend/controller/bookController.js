@@ -257,14 +257,14 @@ export const lentBooks = async (req, res) => {
 
           console.log("Populated bookCollection:", getUserBookList.bookCollection);
 
-          const borrowedBookList = getUserBookList.bookCollection.filter(book => book.bookType === 'lentBook');
-          console.log("bookTitles", borrowedBookList);
+          const lentBookList = getUserBookList.bookCollection.filter(book => book.bookType === ('lent' || 'lentBook'));
+          console.log("bookTitles", lentBookList);
 
           getUserBookList.bookCollection.forEach(book => {
                console.log('bookTypes', book.bookType);
           });
           
-          res.status(200).json(borrowedBookList);
+          res.status(200).json(lentBookList);
      } catch (error) {
           console.error(error);
           res.status(500).json({ message: "Internal Server Error", error: error.message });

@@ -46,13 +46,28 @@ const FriendListOthers: React.FC<FriendListProps> = ({ friends, onConnect }) => 
     </View>
   );
 
+<<<<<<< Updated upstream
+=======
+export default function FriendListOthers() {
+>>>>>>> Stashed changes
   return (
     <View style={styles.container}>
       <Text style={styles.title}>FRIENDS</Text>
       <FlatList
         data={friends}
         keyExtractor={(item) => item.id}
+<<<<<<< Updated upstream
         renderItem={renderItem}
+=======
+        renderItem={({ item }) => (
+          <View style={styles.friendItem}>
+            <Image source={{ uri: item.profileImage }} style={styles.profileImage} />
+            <Text style={styles.username}>{item.username}</Text>
+            <Button title="View Profile"  />
+            <Button title="Message" onPress={() => { /* Message logic */ }} />
+          </View>
+        )}
+>>>>>>> Stashed changes
       />
     </View>
   );

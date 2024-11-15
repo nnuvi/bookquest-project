@@ -21,6 +21,7 @@ const Page = () => {
 
 
   // Handle back button press on Android
+  /*
   const handleBackPress = () => {
     BackHandler.exitApp();
     return true;
@@ -29,7 +30,7 @@ const Page = () => {
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
     return () => backHandler.remove();
-  }, []);
+  }, []);*/
 
   //Requesting Camerra permission
     useEffect(() => {

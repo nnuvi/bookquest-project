@@ -1,10 +1,20 @@
+import { Colors } from '@/constants/Colors';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { Colors } from '@/constants/Colors';
 
 export default function AddBookManuallyScreen() {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
+  const [formData, setFormData] = useState({
+    title: "",
+    author: [],
+    genre: [],
+    description: "",
+    publisher: "",
+    publishDate: "",
+    pageCount: "",
+    isbn: "",
+  });
 
   const handleSaveBook = () => {
     console.log("Book saved:", { title, author });

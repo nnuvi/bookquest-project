@@ -1,4 +1,4 @@
-iimport React from 'react';
+import React from 'react';
 import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
@@ -47,7 +47,7 @@ const ProfileScreen = () => {
             <Text style={styles.infoText}>100</Text>
             <Text style={styles.infoLabel}>Books</Text>
           </View>
-          <TouchableOpacity style={styles.infoBox} onPress={() => navigation.navigate('Friends')}>
+          <TouchableOpacity style={styles.infoBox} >
             <Text style={styles.infoText}>19</Text>
             <Text style={styles.infoLabel}>Friends</Text>
           </TouchableOpacity>

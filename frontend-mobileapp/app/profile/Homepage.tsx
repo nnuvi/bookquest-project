@@ -1,26 +1,56 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
-type Book = {
-  id: string;
+import { retroFont } from '@/utils/fontAdd';
+import { router } from 'expo-router';
+import api from '@/utils/api'
+
+
+
+
+ type Book = {
+  _id: string;
   title: string;
   image: string;
-};
-
-const books: Book[] = [
-  { id: '1', title: 'Book 1', image: 'https://example.com/book1.jpg' },
-  { id: '2', title: 'Book 2', image: 'https://example.com/book2.jpg' },
-  // Add more books as needed
-];
+ }
 
 const HomeScreen = () => {
-  const navigation = useNavigation();
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+  const [books, setBooks] = useState<Book[]>([]);
+  console.log('Current Form Data:', formData);
+  const getBookCollection = async () => {
+    try {
+      const res = await api.get("/books/myBooks");
+      const data: Book[] = await res.data.bookCollection;
+               console.log('res data', res.data);
+               console.log('data', data);
+               console.log('status',res.status);
+               if (data) {
+                console.log('data', data);
+                setBooks(data);
+              } else {
+                console.log('No books found');
+                setBooks([]);  // Ensure an empty array is set if no books are available
+              }
+              return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+    // Fetch data when the component mounts
+    useEffect(() => {
+      getBookCollection();
+      console.log('Books after setting state:', books);
+    }, []);
 
   const renderBookItem = ({ item }: { item: Book }) => (
     <TouchableOpacity
       style={styles.bookContainer}
-      onPress={() => navigation.navigate('BookDetails', { bookId: item.id })}
+      onPress={() => { router.push(`/profile/BookDetails?bookId=${item._id.toString()}`)}}
     >
       <Image source={{ uri: item.image }} style={styles.bookImage} />
       <Text style={styles.bookTitle}>{item.title}</Text>
@@ -33,17 +63,17 @@ const HomeScreen = () => {
       <View style={styles.bar}>
         <Text style={styles.barTitle}>BookQuest</Text>
         <View style={styles.navOptions}>
-          <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+          <TouchableOpacity >
             <Text style={[styles.activeNavItem]}>Home</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Search')}>
+          <TouchableOpacity >
             <Text style={styles.navItem}>Search</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Alerts')}>
+          <TouchableOpacity >
             <Text style={styles.navItem}>Alerts</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-            <Text style={styles.navItem}>Profile</Text>
+          <TouchableOpacity >
+            <Text style={styles.navItem} onPress={() => router.push('/profile/MyProfile')}>Profile</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -52,9 +82,10 @@ const HomeScreen = () => {
       <FlatList
         data={books}
         renderItem={renderBookItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id.toString()}
         numColumns={2}
         contentContainerStyle={styles.bookList}
+        ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>No books available.</Text>}
       />
     </View>
   );
@@ -72,12 +103,11 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   barTitle: {
-    fontSize: 30,
-    fontWeight: 'bold',
+    fontSize: 40,
     color: Colors.background,
-    fontFamily: 'CustomFonts',
+    fontFamily: 'CustomFont',
     textAlign: 'left',
-    marginBottom: 2,
+    marginBottom: 10,
   },
   navOptions: {
     flexDirection: 'row',
@@ -97,7 +127,8 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   bookContainer: {
-    flex: 1,
+    //flex: 1,
+    width: '45%',
     margin: 10,
     alignItems: 'center',
     backgroundColor: '#FFF',
