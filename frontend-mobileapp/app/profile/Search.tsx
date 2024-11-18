@@ -131,16 +131,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 20,
   },
-  backArrow: {
-    color: '#1E1E1E',
-    fontSize: 18,
+ backArrow: {
+    color: Colors.black,
+    fontSize: 24,
+    fontWeight: '200',
     marginRight: 10,
   },
   input: {
     flex: 1,
     backgroundColor: '#FFD966',
     padding: 8,
-    color: '#1E1E1E',
+    color: Colors.black,
     borderRadius: 8,
   },
   resultContainer: {
