@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, FlatList,} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
+import api from '@/utils/api';
+import { router } from 'expo-router';
+//import {userId, UserProvider } from './getMe'
+import { useUser } from './getMe';
+
+type User = {
+  _id: number;
+  username: string;
+  bio: string;
+}
 
 interface SearchResult {
   id: string;
@@ -20,14 +30,77 @@ interface SearchProps {
   onBorrow: (id: string) => void;
 }
 
-const Search: React.FC<SearchProps> = ({ results, onConnect, onBorrow }) => {
+/*/const Search: React.FC<SearchProps> = ({ results, onConnect, onBorrow }) => {*/
+const Search = () => {
   const [query, setQuery] = useState('');
-  const navigation = useNavigation();
+  const [results, setResults] = useState([]);
+  //const navigation = useNavigation();
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const { userId, formData } = useUser();
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+        setDebouncedQuery(query);
+        console.log(query);
+    }, 300); // Adjust delay as needed
+    return () => {
+        clearTimeout(handler); // Clear timeout if query changes
+    };
+}, [query]);
+
+useEffect(() => {
+  if (debouncedQuery.trim() === '') {
+    console.log("deb query effect", debouncedQuery);
+    setResults([]); // Clear results if input is empty
+    return;
+  }
+  console.log("deb data:",debouncedQuery);
+  handleSearch(debouncedQuery);
+}, [debouncedQuery])
+
 
   const handleProfilePress = (username: string) => {
     navigation.navigate('ProfileView', { username });
   };
+  const handleSearch = async (text: string) => {
+    console.log("res text:", text);
+    //setQuery(text);
+    if (text.length < 3) {
+      setResults([]);
+      return;
+    }
+    console.log("res2 text:", text);
+    try {
+      const res = await api.get(`/users/searchProfile?q=${text}`);
+      console.log("res:", res);
+      const data = res.data;
+      console.log(data);
+      const filteredResults = data.filter((user) => user._id !== userId);
+      setResults(filteredResults);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
+  //const userId = UserProvider();
+  console.log("userId: ", userId);
+
+  const renderItem = ({ item }: { item: User }) => (
+    <TouchableOpacity 
+    style={styles.resultContainer}
+    onPress={() => router.push(`/profile/ProfileView?profileId=${item._id}`)}>
+      <Image
+      source={{ uri: 'https://via.placeholder.com/100' }}
+      style={styles.bookImage}
+      />
+      <View style={styles.bookInfo}>
+        <Text style={styles.title}>{item.username}</Text>
+        <Text style={styles.author}>{item.bio}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  /*
   const renderButton = (item: SearchResult) => {
     if (item.type === 'book') {
       return item.isBorrowed ? (
@@ -58,7 +131,8 @@ const Search: React.FC<SearchProps> = ({ results, onConnect, onBorrow }) => {
     }
     return null;
   };
-
+*/
+/*
   const renderItem = ({ item }: { item: SearchResult }) => (
     <View style={styles.resultContainer}>
       {item.type === 'book' ? (
@@ -88,33 +162,43 @@ const Search: React.FC<SearchProps> = ({ results, onConnect, onBorrow }) => {
       {renderButton(item)}
     </View>
   );
+*/
 
   return (
     <View style={styles.container}>
       <View style={styles.searchBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => router.push('/profile/ProfileView')}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
         <TextInput
           style={styles.input}
           placeholder="Search"
-          placeholderTextColor="#1E1E1E"
-          value={query}
+          placeholderTextColor= {Colors.text}
+          //value={query}
           onChangeText={setQuery}
         />
       </View>
       <FlatList
-        data={results.filter((item) =>
-          item.type === 'book'
-            ? item.title?.toLowerCase().includes(query.toLowerCase())
-            : item.username?.toLowerCase().includes(query.toLowerCase())
-        )}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
+      data={results}
+      renderItem={renderItem}
+      keyExtractor={(item => item._id.toString())}
+      ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>No search result available.</Text>}
       />
+
     </View>
   );
 };
+  { /*     
+    <FlatList
+       data={results.filter((item) =>
+         item.type === 'book'
+           ? item.title?.toLowerCase().includes(query.toLowerCase())
+           : item.username?.toLowerCase().includes(query.toLowerCase())
+       )}
+       keyExtractor={(item) => item.id}
+       renderItem={renderItem}
+     />*/}
+
 
 const styles = StyleSheet.create({
   container: {
@@ -132,7 +216,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   backArrow: {
-    color: '#1E1E1E',
+    color: Colors.gray,
     fontSize: 18,
     marginRight: 10,
   },

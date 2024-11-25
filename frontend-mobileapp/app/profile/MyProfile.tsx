@@ -29,10 +29,6 @@ type BorrowedBook = {
   dateBorrowed: string;
 };
 
-const borrowedBooks: BorrowedBook[] = [
-  { id: '1', title: 'Book 1', author: 'Author 1', image: 'https://example.com/book1.jpg', dateBorrowed: '2024-11-10' },
-  { id: '2', title: 'Book 2', author: 'Author 2', image: 'https://example.com/book2.jpg', dateBorrowed: '2024-10-25' },
-];
 
 const ProfileScreen = () => {
   const route = useRouter();
@@ -45,6 +41,7 @@ const ProfileScreen = () => {
 
   const [ bookCollection, setBookCollection ] = useState([]);
   const [ lentBooks, setlentBooks ] = useState([]);
+  const [ borrowedBooks, setBorrowedBooks ] = useState([]);
 
 
   const getMe = async() => {
@@ -62,6 +59,9 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     getMe();
+    getBookCollection();
+    getLentBook();
+    getBorrowedBook();
     console.log('meee:', formData);
   }, []);
 
@@ -90,15 +90,29 @@ const ProfileScreen = () => {
     }
   }
 
-  useEffect(() => {
+  const getBorrowedBook = async () => {
+    try {
+      const res = await api.get('/books/borrowedBooks');
+      console.log("borrowed current: ", res);
+      console.log("borrowed current: ", res.data);
+      const data: Book[] = res.data;
+      console.log("current borrowed data: ", data);
+      setBorrowedBooks(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+ /* useEffect(() => {
     getBookCollection();
     getLentBook();
+    getBorrowedBook();
     console.log('bcccc:', bookCollection);
-  }, []);
+  }, []);*/
 
   useEffect(() => {
     console.log('Updated book collection:', bookCollection);
-  }, [bookCollection, lentBooks]);
+  }, [bookCollection, lentBooks, borrowedBooks]);
 
   const handleAddBook = () => {
     Alert.alert(
@@ -115,33 +129,33 @@ const ProfileScreen = () => {
   };
   console.log('meee:');
 
- /* const renderBookItem = ({ item }: { item: Book }) => (
-    <View style={styles.bookItem}>
-      <Image source={{ uri: item.image }} style={styles.bookImage} />
-      <View style={styles.bookDetails}>
-        <Text style={styles.bookTitle}>{item.title}</Text>
-        <Text style={styles.bookAuthor}>{item.author}</Text>
-      </View>
-      <TouchableOpacity style={styles.lendButton}>
-        <Text style={styles.lendButtonText}>Lend</Text>
-      </TouchableOpacity>
-    </View>
-  );*/
-
   const renderBookItem = ({ item }: { item: Book }) => (
-
     <View style={styles.bookItem}>
       <View style={styles.bookImage} />
       <TouchableOpacity style={styles.bookDetails}>
         <Text style={styles.bookTitle}>{item.title}</Text>
         <Text style={styles.bookAuthor}>{item.author.join(", ")}</Text>
         {item.bookType !== 'myBook' && (
+          (item.bookType === 'lent' || item.bookType === 'lentBook') ? (
           <Text style={styles.bookDate}>Lent on: {item.bookAdded}</Text>
+          ) : item.bookType === 'borrow' || item.bookType === 'borrowedBook' ? (
+          <Text style={styles.bookDate}>Borrowed on: {item.bookAdded}</Text>
+          ) : null
         )}
       </TouchableOpacity>
-      <TouchableOpacity style={styles.lendButton}>
-        <Text style={styles.lendButtonText}>Lend</Text>
-      </TouchableOpacity>
+      
+      {item.bookType !== 'myBook' && (
+          (item.bookType === 'lent' || item.bookType === 'lentBook') ? (
+            <TouchableOpacity style={styles.lendButton}>
+              <Text style={styles.lendButtonText}>Ask Back</Text>
+            </TouchableOpacity>
+          ) : item.bookType === 'borrow' || item.bookType === 'borrowedBook' ? (
+            <TouchableOpacity style={styles.lendButton}>
+              <Text style={styles.lendButtonText}>Return</Text>
+            </TouchableOpacity>
+          ) : null
+        )}
+        {/*<Text style={styles.lendButtonText}>Lend</Text>*/}
     </View>
   );
 
@@ -179,10 +193,12 @@ const ProfileScreen = () => {
     <View style={styles.container}>
       {/* Profile Section */}
       <View style={styles.profileSection}>
+        <View style={styles.imageContainer}>
         <Image
           source={{ uri: 'https://example.com/profile-pic.jpg' }}
           style={styles.profilePic}
         />
+        </View>
         <View style={styles.infoBoxes}>
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>100</Text>
@@ -241,15 +257,25 @@ const ProfileScreen = () => {
           renderItem={renderBookItem}
           keyExtractor={(item) => item._id.toString()}
           contentContainerStyle={styles.bookList}
+          ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>
+            No books available.
+          </Text>}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false} 
         />
       )}
 
       {activeTab === 'borrowed' && (
         <FlatList
           data={borrowedBooks}
-          renderItem={renderBorrowedBookItem}
-          keyExtractor={(item) => item.id}
+          renderItem={renderBookItem}
+          keyExtractor={(item) => item._id.toString()}
           contentContainerStyle={styles.bookList}
+          ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>
+            No books available.
+          </Text>}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false} 
         />
       )}
 
@@ -259,6 +285,11 @@ const ProfileScreen = () => {
           renderItem={renderBookItem}
           keyExtractor={(item) => item._id.toString()}
           contentContainerStyle={styles.bookList}
+          ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>
+            No books available.
+          </Text>}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false} 
         />
       )}
     </View>
@@ -275,28 +306,64 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
+    width: '100%',
+    /*flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,*/
   },
-  profilePic: {
-    width: 80,
-    height: 80,
-    borderRadius: 50,
+  imageContainer: {
+    marginTop: 20,
     borderWidth: 2,
     borderColor: Colors.choco,
+    borderRadius: 75, // Half of the width/height to make it circular
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  profilePic: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
+    /*position:'absolute',
+    width: 'auto',
+    height: 'auto',
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: Colors.choco,*/
   },
   infoBoxes: {
-    position:'absolute',
     flexDirection: 'row',
-    marginLeft: 150,
+    justifyContent: 'flex-end',
+    width: '70%',
+    marginTop: 20,
+    marginRight: 10,
+    //position:'absolute',
+    /*position:'absolute',
+    flexDirection: 'row',
+    marginLeft: 180,
+    marginTop: 50,*/
   },
   infoBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     backgroundColor: Colors.choco,
+    borderRadius: 10,
+    elevation: 3, // For a slight shadow effect on Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    /*backgroundColor: Colors.choco,
     padding: 5,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 10,
     borderRadius: 8,
-    width: 60,
+    width: 60,*/
   },
   infoText: {
     fontSize: 18,

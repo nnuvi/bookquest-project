@@ -1,55 +1,106 @@
-import React, { useState } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
+import { router } from 'expo-router';
+import api from '@/utils/api';
 
 type Book = {
-  id: string;
+  _id: string;
   title: string;
-  author: string;
-  image: string;
+  author: string[]; // Assuming the author is an array of strings
+  genre: string[]; // Assuming the genre is an array of strings
+  publisher: string;
+  publicationDate: Date | null; // Assuming publicationDate can be null
+  pageCount: number | null; // pageCount can be null
+  description: string;
+  isbn: number | null; // isbn can be null
+  bookAdded: Date | null;
+  bookType: string;
 };
 
-const books: Book[] = [
-  { id: '1', title: 'Book 1', author: 'Author 1', image: 'https://example.com/book1.jpg' },
-  { id: '2', title: 'Book 2', author: 'Author 2', image: 'https://example.com/book2.jpg' },
-];
-
 const ProfileView = () => {
+  const route = useRoute();
+  const { profileId } = route.params; 
   const navigation = useNavigation();
   const [isConnected, setIsConnected] = useState(false);
+  const [ bookCollection, setBookCollection ] = useState([]);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    username: "",
+    bio: "",
+  });
+  console.log("profileid: ", profileId);
 
   const handleConnectToggle = () => {
     setIsConnected(!isConnected);
   };
 
+  const getProfileInfo = async() => {
+    try {
+      const res = await api.get(`/users/profile/${profileId}`);
+      console.log("user current: ", res.data);
+      const data = res.data;
+      console.log("user current data: ", data);
+      setFormData(data);
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const getBookCollection = async () => {
+    try {
+      const res = await api.get(`/books/${profileId}/bookList`);
+      console.log("bc current: ", res.data);
+      const data = res.data.bookCollection;
+      console.log("bc current data: ", Array.isArray(res.data));
+      setBookCollection(data);
+      console.log("bc now: ", bookCollection);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  useEffect (() => {
+    getProfileInfo();
+    getBookCollection();
+    console.log('invoked profileinfo and bc');
+  }, []);
+
+  useEffect(() => {
+    console.log('Updated book collection:', bookCollection);
+  }, [bookCollection]);
+
   const renderBookItem = ({ item }: { item: Book }) => (
-    <View style={styles.bookItem}>
-      <Image source={{ uri: item.image }} style={styles.bookImage} />
+    <TouchableOpacity style={styles.bookItem}>
+      <Image style={styles.bookImage} />
       <View style={styles.bookDetails}>
         <Text style={styles.bookTitle}>{item.title}</Text>
-        <Text style={styles.bookAuthor}>{item.author}</Text>
+        <Text style={styles.bookAuthor}>{item.author.join(", ")}</Text>
       </View>
       <TouchableOpacity style={styles.borrowButton}>
         <Text style={styles.borrowButtonText}>Borrow</Text>
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
       {/* Profile Section */}
       <View style={styles.profileSection}>
-        <Image
-          source={{ uri: 'https://example.com/profile-pic.jpg' }}
-          style={styles.profilePic}
-        />
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: 'https://example.com/profile-pic.jpg' }}
+            style={styles.profilePic}
+          />
+        </View>
         <View style={styles.infoBoxes}>
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>100</Text>
             <Text style={styles.infoLabel}>Books</Text>
           </View>
-          <TouchableOpacity style={styles.infoBox} onPress={() => navigation.navigate('Friends')}>
+          <TouchableOpacity style={styles.infoBox} onPress={() => router}>
             <Text style={styles.infoText}>19</Text>
             <Text style={styles.infoLabel}>Friends</Text>
           </TouchableOpacity>
@@ -70,9 +121,9 @@ const ProfileView = () => {
 
       {/* Profile Details */}
       <View style={styles.profileDetails}>
-        <Text style={styles.name}>Name</Text>
-        <Text style={styles.username}>@username</Text>
-        <Text style={styles.bio}>This is a sample bio.</Text>
+        <Text style={styles.name}>{formData.fullName}</Text>
+        <Text style={styles.username}>@{formData.username}</Text>
+        <Text style={styles.bio}>{formData.bio}</Text>
       </View>
 
       {/* Navigation Bar */}
@@ -82,10 +133,15 @@ const ProfileView = () => {
 
       {/* Book List */}
       <FlatList
-        data={books}
+        data={bookCollection}
         renderItem={renderBookItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id.toString()}
         contentContainerStyle={styles.bookList}
+        ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>
+          No books available.
+        </Text>}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false} 
       />
     </View>
   );
@@ -101,27 +157,42 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
+    width: '100%',
   },
-  profilePic: {
-    width: 80,
-    height: 80,
-    borderRadius: 50,
+  imageContainer: {
+    marginTop: 20,
     borderWidth: 2,
     borderColor: Colors.choco,
+    borderRadius: 75, // Half of the width/height to make it circular
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  profilePic: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
   },
   infoBoxes: {
     flexDirection: 'row',
-    marginLeft: 148,
+    justifyContent: 'flex-end',
+    width: '70%',
+    marginTop: 20,
+    marginRight: 10,
   },
   infoBox: {
-    backgroundColor: Colors.choco,
-    padding: 5,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 10,
-    borderRadius: 8,
-    width: 60,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.choco,
+    borderRadius: 10,
+    elevation: 3, // For a slight shadow effect on Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   infoText: {
     fontSize: 18,
@@ -173,7 +244,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.choco,
     padding: 10,
     justifyContent: 'space-around',
-    marginBottom: 25,
+    //marginBottom: 25,
+    marginTop:10,
   },
   navItem: {
     fontSize: 16,

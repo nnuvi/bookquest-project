@@ -1,6 +1,6 @@
+import React, { useState } from 'react';
+import { View, TextInput, Button, FlatList, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 
-<<<<<<< Updated upstream
-=======
 const users = [
   { id: '1', username: 'User1', profileImage: 'user_profile_image_url' },
   { id: '2', username: 'User2', profileImage: 'user_profile_image_url' },
@@ -41,4 +41,3 @@ const styles = StyleSheet.create({
   userItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
   profileImage: { width: 50, height: 50, borderRadius: 25, marginRight: 10 },
 });
->>>>>>> Stashed changes

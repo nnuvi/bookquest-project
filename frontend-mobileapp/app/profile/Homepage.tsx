@@ -67,7 +67,7 @@ const HomeScreen = () => {
             <Text style={[styles.activeNavItem]}>Home</Text>
           </TouchableOpacity>
           <TouchableOpacity >
-            <Text style={styles.navItem}>Search</Text>
+            <Text style={styles.navItem} onPress={() => router.push('/profile/Search')}>Search</Text>
           </TouchableOpacity>
           <TouchableOpacity >
             <Text style={styles.navItem}>Alerts</Text>

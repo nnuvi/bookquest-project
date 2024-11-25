@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-
+import { UserProvider } from './profile/getMe';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -42,7 +42,7 @@ export default function RootLayout() {
   }
 
   return (
-    
+    <UserProvider>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -60,7 +60,9 @@ export default function RootLayout() {
           <Stack.Screen name="profile/Homepage" options={{ headerShown: false }} />
           <Stack.Screen name="profile/MyProfile" options={{ headerShown: false }} />
           <Stack.Screen name="profile/Myborrowed" options={{ headerShown: false }} />
+          <Stack.Screen name="profile/ProfileView" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
+    </UserProvider>
   );
 }

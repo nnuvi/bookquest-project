@@ -1,6 +1,6 @@
+import React, { useState } from 'react';
+import { View, TextInput, Button, FlatList, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
-<<<<<<< Updated upstream
-=======
 const books = [
   { id: '1', title: 'Book Title One', author: 'Author1', cover: 'book_cover_url' },
   { id: '2', title: 'Book Title Two', author: 'Author2', cover: 'book_cover_url' },
@@ -43,4 +43,3 @@ const styles = StyleSheet.create({
   bookImage: { width: 50, height: 70, marginRight: 10 },
   author: { color: 'gray' },
 });
->>>>>>> Stashed changes

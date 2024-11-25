@@ -55,6 +55,11 @@ const bookSchema = new mongoose.Schema({
           default: Date.now
      },
 
+     borrowedBookId:{
+          type:String,
+          default: ''
+     },
+
 }, {timestamps: true});
 
 const Books = mongoose.model("Books", bookSchema);

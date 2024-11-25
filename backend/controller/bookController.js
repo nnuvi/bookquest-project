@@ -1,6 +1,7 @@
 import User from "../model/userModel.js";
 import Books from "../model/bookModel.js";
 import Tesseract from "tesseract.js";
+import Notification from "../model/notificationModel.js";
 //import { preprocessImage } from "../lib/util/preProcessImage.js";
 
 export const manualImport = async (req, res) => {
@@ -173,11 +174,13 @@ export const getMyBooks = async (req, res) => {
 export const getUserBookList = async (req, res) => {
      try {
           const userId = req.user._id.toString();
-          console.log( req.user );
           const profileUserId = req.params.id;
-          console.log( profileUserId  );
+
+          console.log("User ID from req.user:", userId);
+          console.log("Profile ID from params:", profileUserId);
+
           const user = await User.findById(userId);
-          console.log("user : ",user );
+          //console.log("user : ",user );
           if(!user) return res.status(400).json({message: "User not Found"});
 
           const getUserBookList = await User.findById(profileUserId)
@@ -273,85 +276,40 @@ export const lentBooks = async (req, res) => {
 
 export const borrowBook = async (req, res) => {
      try {
-          const userId = req.user._id.toString();
+          const userId = req.user._id.toString(); //user id
           console.log( req.user );
-          const { profileUserId, bookId } = req.params;
+          const { profileUserId, bookId } = req.params; //profile and book id
 
           console.log(" profileUserId :", profileUserId );
           console.log(" bookId :", bookId );
           const { title, author, genre } = req.body;
-          const user = await User.findById(userId);
+          const user = await User.findById(userId); //get loggedit user 
           console.log("user : ", user );
           if(!user) return res.status(400).json({message: "User not Found"});
-          const profileUser = await User.findById(profileUserId);
+          const profileUser = await User.findById(profileUserId); //get visiting profile id
           console.log( "profileUser:", profileUser );
-          const book = await Books.findById(bookId);
+          const book = await Books.findById(bookId); //get the book 
           console.log( "book:", book );
 
-          const isAlreadyBookExist = await user.bookCollection.includes(bookId);
+          const isAlreadyBookExist = await user.bookCollection.includes(bookId); //book exists
           console.log("isAlreadyBookExist:", isAlreadyBookExist);
           if(isAlreadyBookExist) {
                return res.status(400).json({ message: "Book already exist" });
           }
 
-          const userBook = await User.findById(userId)
-          .populate('bookCollection', 'title')  // Only populate the 'title' of each book
-          .exec(); // Executes the query
-
-         if (!userBook) {
-           console.log('User not found');
-           return [];
-         }
-         const bookTitles = userBook.bookCollection.map(book => book.title);
-         console.log("bookTitles",bookTitles);
-
-         const bookExists = bookTitles.includes(title);
-         console.log("bookExists",bookExists);
-
-         if(bookExists) {
-              return res.status(400).json({ message: "Book already exist" });
-         }
-
-         if(!bookExists) {
-  /*        const updateBookForUser = await Books.findByIdAndUpdate(
-               bookId, 
-               { $set: { bookType: 'borrowed' } }, 
-               { new: true }
-          );
-          console.log("updateBookForUser:", updateBookForUser);
-          user.bookCollection.push(bookId);
-          await user.save();
- */
-
-          // Step 2: Create a new book entry with a different `bookType`
-          const newBorrowedBook = new Books({
-               ...originalBook.toObject(), // Copy all fields from the original book
-               _id: mongoose.Types.ObjectId(), // Generate a new ID
-               bookType: 'borrowedBook', // Set to 'borrowed' for the borrowing user
+          const notification = new Notification({
+               from: userId,
+               to: profileUserId,
+               message: `${user.fullName} Requested to Borrow the book ${title} by ${author} from you`,
+               type: 'bookRequest',
           });
-          
-          // Save the new book document
-          const savedBorrowedBook = await newBorrowedBook.save();
-          console.log("New Borrowed Book:", savedBorrowedBook);
-          
-          // Step 3: Add the new book ID to the borrower's collection
-          user.bookCollection.push(savedBorrowedBook._id);
-          await user.save();
-          
-          const updateBookForProfileUser = await Books.findByIdAndUpdate(
-               bookId, 
-               { $set: { bookType: 'lentBook' } }, 
-               { new: true }
-          );
-          console.log("updateBookForProfileUser:", updateBookForProfileUser);
-          profileUser.bookCollection.push(bookId);
-          await profileUser.save();
-         }
-         res.status(200).json({ message: "borrowed successful!!!"});
+          console.log("notification:", notification);
+          await notification.save();
+          console.log("notification saved");
+          res.status(200).json({ message: "request to borrow book successful!!!"});
 
      } catch (error) {
           console.log("error:", error);
           res.status(500).json({ message: "Internal Server Error", error: error.message });
      }
-
 }

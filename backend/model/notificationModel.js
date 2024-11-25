@@ -19,6 +19,18 @@ const notificationSchema = new mongoose.Schema({
      read: {
           type: Boolean,
           default: false,
+     },
+     message:{
+          type: String,
+          required: true
+     },
+     request:{
+          type: String,
+          enum: ['approved', 'declined']
+     },
+     book:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Book',
      }
 }, { timestamps: true});  
 

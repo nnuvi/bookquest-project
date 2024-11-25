@@ -9,8 +9,9 @@ import bcrypt from 'bcryptjs';
 
 export const getUserProfile = async (req, res) => {
      try {
-          const { username } = req.params;
-          const user = await User.findOne({ username }).select("-password");
+          const { id } = req.params;
+          console.log("id: ", id);
+          const user = await User.findById(id).select("-password");
           console.log(user);
           if (!user) {
                return res.status(404).json({ error: 'User not found' });
@@ -142,4 +143,19 @@ export const friendList = async (req, res) => {
           res.status(500).json({menubar: "Error in friendList: ", error: error.message });
      }
 
+}
+
+export const searchProfile = async (req, res) => {
+     try {
+          const search = req.query.q;
+          console.log(search);
+          const users = await User.find({ $or: [ 
+               { username: { $regex: search, $options: "i" } },
+          ] });
+          console.log(users);
+          res.status(200).json(users);
+     } catch (error) {
+          console.log("Error in Search: ", error.message);
+          res.status(500).json({message: "Error in search: ", error: error.message });
+     }
 }
