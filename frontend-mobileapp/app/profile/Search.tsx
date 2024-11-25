@@ -216,15 +216,16 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   backArrow: {
-    color: Colors.gray,
-    fontSize: 18,
+    color: Colors.black,
+    fontSize: 24,
+    fontWeight: '200',
     marginRight: 10,
   },
   input: {
     flex: 1,
     backgroundColor: '#FFD966',
     padding: 8,
-    color: '#1E1E1E',
+    color: Colors.black,
     borderRadius: 8,
   },
   resultContainer: {
