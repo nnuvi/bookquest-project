@@ -1,0 +1,9 @@
+.header {
+    background-color: #5c3d2e;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
