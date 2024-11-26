@@ -1,8 +1,0 @@
-/* src/pages/ProfilePic.css */
-
-.profile-pic-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-}
