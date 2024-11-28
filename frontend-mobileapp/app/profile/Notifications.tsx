@@ -1,59 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text,TouchableOpacity, FlatList, Image, StyleSheet,} from 'react-native';
 import { Colors } from '@/constants/Colors';
+import { useUser } from './getMe';
+import api from '@/utils/api';
 
-interface Notification {
-  id: string;
-  type: 'connect' | 'action';
-  username: string;
-  message: string;
-  bookName?: string;
+type User = {
+     _id: string;
+     fullName: string;
+};
+
+type Notification = {
+     _id: string;
+     from: User;
+     to: User;
+     type: string;
+     message: string;
+     read: boolean;
+     request: string;
+     book: string;
 }
 
 const NotificationScreen: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unseenCount, setUnseenCount] = useState<number>(0);
+  const { userId, formData } = useUser();
 
-  // fetching notifications dynamically
+
+  const getAllNotifications = async() => {
+     try {
+          console.log('noti before api');
+          const res = await api.get("/notifications/");
+          const data = await res.data;
+          console.log('noti data', data);
+          //const notificationId = data._id;
+          //console.log('noti id', notificationId);
+          setNotifications(data);
+          setUnseenCount(data.length);
+          console.log('noti after api')
+          console.log('noti statusstatus',res.status);
+     } catch (error) {
+          console.error(error);
+     }
+  }
+
+  const sendAction = async (action:string, notificationId:string) => {
+     try {
+          console.log('res action: ', action);
+          const res = await api.put(`/books/approveDecline/`, {action, notificationId});
+          console.log('res', res);
+          console.log('res status', res.status);
+          await getAllNotifications();
+          //console.log('res data', res.data);
+     } catch (error) {
+          console.error(error);
+     }
+  }
+
+  const getReminer = async () => {
+     try {
+          const res = await api.get('/notifications/reminder');
+          console.log('res reminder', res);
+          console.log('res reminder status', res.status);
+     } catch (error) {
+          console.error(error);
+     }
+  }
+
   useEffect(() => {
-    // get notifications from backend and modify this part
-    const fetchNotifications = async () => {
-      const fetchedNotifications: Notification[] = [
-        {
-          id: '1',
-          type: 'connect',
-          username: 'user1',
-          message: 'requested to connect with you.',
-        },
-        {
-          id: '2',
-          type: 'action',
-          username: 'user2',
-          message: 'notified you to return the "Book Name" back.',
-          bookName: 'Book Name',
-        },
-      ];
-      setNotifications(fetchedNotifications);
-      setUnseenCount(fetchedNotifications.length);
-    };
-
-    fetchNotifications();
+     getAllNotifications();
+     getReminer();
   }, []);
 
-  const handleConnectBack = (id: string) => {
-    // put the code of add user to friend list logic 
-    console.log('User added to friend list');
-    // remove notification
-    handleDelete(id);
-  };
-
-  const handleDelete = (id: string) => {
-    const updatedNotifications = notifications.filter(
-      (notification) => notification.id !== id
-    );
-    setNotifications(updatedNotifications);
-    setUnseenCount(updatedNotifications.length);
-  };
 
   const renderNotification = ({ item }: { item: Notification }) => (
     <View style={styles.notificationContainer}>
@@ -63,21 +80,21 @@ const NotificationScreen: React.FC = () => {
       />
       <View style={styles.notificationContent}>
         <Text style={styles.notificationText}>
-          <Text style={styles.username}>{item.username}</Text> {item.message}
+          {/*<Text style={styles.username}>{item.from.fullName}</Text> */}{item.message}
         </Text>
-        {item.type === 'connect' && (
+        {item.type === 'bookRequest' && (
           <View style={styles.buttonsContainer}>
             <TouchableOpacity
               style={styles.connectButton}
-              onPress={() => handleConnectBack(item.id)}
+              onPress={() => sendAction('approved', item._id)}
             >
-              <Text style={styles.buttonText}>CONNECT BACK</Text>
+              <Text style={styles.buttonText}>Accept</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.deleteButton}
-              onPress={() => handleDelete(item.id)}
+              onPress={() => sendAction('declined', item._id)}
             >
-              <Text style={styles.buttonText}>DELETE</Text>
+              <Text style={styles.buttonText}>Delete</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -87,6 +104,10 @@ const NotificationScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.bar}>
+        <Text style={styles.barTitle}>BookQuest</Text>
+      </View>
+      <View style={styles.containerBody}>
       <View style={styles.header}>
         <Text style={styles.headerText}>ALERTS</Text>
         {unseenCount > 0 && (
@@ -95,93 +116,127 @@ const NotificationScreen: React.FC = () => {
           </View>
         )}
       </View>
+      <View style={styles.headerSpace}></View>
       <FlatList
         data={notifications}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item => item._id.toString())}
         renderItem={renderNotification}
+        ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>
+        No Notification available.
+        </Text>}
+        //scrollEnabled={false}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={{ flexGrow: 1 }}
       />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background ,
-    paddingHorizontal: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginVertical: 20,
-  },
-  headerText: {
-    fontSize: 24,
-    color: Colors.yellow,
-    fontWeight: 'bold',
-  },
-  badge: {
-    backgroundColor: Colors.choco,
-    borderRadius: 15,
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badgeText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  notificationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-    marginBottom: 15,
-    borderRadius: 10,
-    padding: 10,
-  },
-  profilePic: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  notificationContent: {
-    flex: 1,
-  },
-  notificationText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  username: {
-    fontWeight: 'bold',
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  connectButton: {
-    backgroundColor: Colors.savoy,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  deleteButton: {
-    backgroundColor: Colors.savoy,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-});
+     container: {
+       flex: 1, // Full height for the parent container
+       backgroundColor: Colors.background,
+     },
+     containerBody: {
+       flex: 1, // Allow containerBody to fill the rest of the screen
+       paddingHorizontal: 20,
+     },
+     bar: {
+       backgroundColor: Colors.choco,
+       padding: 16,
+       paddingTop: 50,
+       paddingBottom: 10,
+       paddingHorizontal: null,
+     },
+     barTitle: {
+       fontSize: 40,
+       color: Colors.background,
+       fontFamily: 'CustomFont',
+       textAlign: 'left',
+       marginBottom: 10,
+     },
+     header: {
+       flexDirection: 'row',
+       alignItems: 'center',
+       justifyContent: 'space-between',
+       margin: 10,
+     },
+     headerSpace: {
+       height: 10,
+       borderBottomWidth: 5,
+       borderBottomColor: Colors.choco,
+     },
+     headerText: {
+       fontSize: 24,
+       color: Colors.yellow,
+       fontWeight: 'bold',
+     },
+     badge: {
+       backgroundColor: Colors.choco,
+       borderRadius: 15,
+       width: 30,
+       height: 30,
+       justifyContent: 'center',
+       alignItems: 'center',
+     },
+     badgeText: {
+       color: '#FFFFFF',
+       fontSize: 16,
+       fontWeight: 'bold',
+     },
+     notificationContainer: {
+       flexDirection: 'row',
+       alignItems: 'center',
+       backgroundColor: Colors.background,
+       margin: 10,
+       borderRadius: 10,
+       padding: 10,
+       borderBottomWidth: 1,
+       borderBottomColor: Colors.choco,
+     },
+     profilePic: {
+       width: 50,
+       height: 50,
+       borderRadius: 25,
+       marginRight: 10,
+     },
+     notificationContent: {
+       flex: 1,
+     },
+     notificationText: {
+       color: '#FFFFFF',
+       fontSize: 16,
+       marginBottom: 10,
+     },
+     username: {
+       fontWeight: 'bold',
+     },
+     buttonsContainer: {
+       flexDirection: 'row',
+       justifyContent: 'space-between',
+     },
+     connectButton: {
+       backgroundColor: Colors.savoy,
+       paddingVertical: 8,
+       paddingHorizontal: 15,
+       borderRadius: 5,
+       marginRight: 10,
+     },
+     deleteButton: {
+       backgroundColor: Colors.savoy,
+       paddingVertical: 8,
+       paddingHorizontal: 15,
+       borderRadius: 5,
+     },
+     buttonText: {
+       color: '#FFFFFF',
+       fontSize: 14,
+       fontWeight: 'bold',
+     },
+   });
+   
 
 export default NotificationScreen;
 

@@ -61,6 +61,9 @@ export default function RootLayout() {
           <Stack.Screen name="profile/MyProfile" options={{ headerShown: false }} />
           <Stack.Screen name="profile/Myborrowed" options={{ headerShown: false }} />
           <Stack.Screen name="profile/ProfileView" options={{ headerShown: false }} />
+          <Stack.Screen name="profile/Search" options={{ headerShown: false }} />
+          <Stack.Screen name="profile/Notifications" options={{ headerShown: false }} />
+          <Stack.Screen name="profile/EditProfile" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
     </UserProvider>

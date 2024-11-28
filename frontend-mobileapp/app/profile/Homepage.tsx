@@ -6,8 +6,6 @@ import { router } from 'expo-router';
 import api from '@/utils/api'
 
 
-
-
  type Book = {
   _id: string;
   title: string;
@@ -70,7 +68,7 @@ const HomeScreen = () => {
             <Text style={styles.navItem} onPress={() => router.push('/profile/Search')}>Search</Text>
           </TouchableOpacity>
           <TouchableOpacity >
-            <Text style={styles.navItem}>Alerts</Text>
+            <Text style={styles.navItem} onPress={() => router.push('/profile/Notifications')}>Alerts</Text>
           </TouchableOpacity>
           <TouchableOpacity >
             <Text style={styles.navItem} onPress={() => router.push('/profile/MyProfile')}>Profile</Text>

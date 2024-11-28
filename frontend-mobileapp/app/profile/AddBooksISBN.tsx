@@ -1,44 +1,79 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { Camera } from 'react-native-camera-kit';
-import NetInfo from '@react-native-community/netinfo';
-import { Colors } from '@/constants/Colors';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Alert, Button } from 'react-native';
+import { Camera } from 'expo-camera';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import api from '@/utils/api';
 
-export default function AddBookISBNScreen() {
-  const [isbnData, setIsbnData] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState<boolean | null>(true);
+export default function ISBNScannerScreen() {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
+  const [isbn, setIsbn] = useState(null);
 
-  // Check Internet
-  NetInfo.fetch().then(state => {
-    setIsConnected(state.isConnected);
-  });
+  // Request Camera Permissions
+  useEffect(() => {
+    const getPermissions = async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    };
 
-  const handleScanISBN = () => {
-    if (!isConnected) {
-      Alert.alert("Connection Error", "There is no internet connection", [{ text: "OK" }]);
-      return;
-    }
-    console.log("Scanning ISBN...");
+    getPermissions();
+  }, []);
+
+  // Handle the scanned barcode
+  const handleBarcodeScanned = ({ type, data }) => {
+    console.log('Scanned type:', type);
+    console.log('Scanned data:', data);
+    setScanned(true);
+    setIsbn(data); // Set the scanned ISBN
+    Alert.alert('Scanned ISBN', `ISBN: ${data}`);
+    importByISBN(data);
   };
 
-  const addBookToList = (isbn: string | null) => {
-    if (isbn) {
-      // Add the book to the user list with a mock name and author 
-      console.log(`Adding book: ISBN: ${isbn}, Title: Mock Book, Author: Mock Author`);
-    } else {
-      Alert.alert("Error", "Cannot find the ISBN code.", [{ text: "OK" }]);
-    }
+  // Reset the scanner to scan again
+  const scanAgain = () => {
+    setScanned(false);
+    setIsbn(null);
   };
+
+  // If camera permission is not granted, show a message
+  if (hasPermission === null) {
+    return <Text>Requesting for camera permission...</Text>;
+  }
+
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  const importByISBN = async(isbn) => {
+    try {
+    console.log("isbn", isbn);
+    const res = await api.post(`/books/importBooksByISBN`,{isbn})
+    console.log(res.data);
+    Alert.alert('Imported Books', `Imported ${res.data.length} books`);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>ISBN Scanner</Text>
-      <TouchableOpacity style={styles.scanButton} onPress={handleScanISBN}>
-        <Text style={styles.scanButtonText}>Scan ISBN</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.addButton} onPress={() => addBookToList(isbnData)}>
-        <Text style={styles.addButtonText}>+</Text>
-      </TouchableOpacity>
+      <Text style={styles.title}>Scan ISBN Barcode</Text>
+
+      {!scanned ? (
+        <BarCodeScanner
+          onBarCodeScanned={scanned ? undefined : handleBarcodeScanned}
+          style={StyleSheet.absoluteFillObject}
+        >
+          <View style={styles.overlay}>
+            <Text style={styles.overlayText}>Scan the ISBN Barcode</Text>
+          </View>
+        </BarCodeScanner>
+      ) : (
+        <View style={styles.scannedInfo}>
+          <Text>Scanned ISBN: {isbn}</Text>
+          <Button title="Scan Again" onPress={scanAgain} />
+        </View>
+      )}
     </View>
   );
 }
@@ -48,42 +83,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    
   },
   title: {
     fontSize: 20,
     marginBottom: 20,
   },
-  scanButton: {
-    position: 'absolute',
-    bottom: 200,
-    backgroundColor: Colors.background,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginBottom: 20,
+  overlayText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
-  scanButtonText: {
-    fontSize: 16,
-    color: 'white',
-  },
-  addButton: {
+  overlay: {
     position: 'absolute',
-    bottom: 80, 
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: Colors.background,
-    backgroundColor: Colors.background,
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  scannedInfo: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  addButtonText: {
-    fontSize: 30,
-    color: 'white',
+    padding: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 10,
   },
 });
-
-
-

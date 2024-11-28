@@ -1,12 +1,38 @@
 import { Colors } from '@/constants/Colors';
+import api from '@/utils/api';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
 
 const EditProfile = () => {
-  const [username, setUsername] = useState('Username');
-  const [email, setEmail] = useState('user@example.com');
-  const [bio, setBio] = useState('This is my bio.');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [bio, setBio] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const EditProfile = async() => {
+    try {
+      const res = await api.post("/users/editProfile", {username, email, bio, currentPassword, newPassword });
+      console.log(res.data);
+      setSuccess(true);
+    } catch (error) {
+      console.log("error:", error);
+    }
+    console.log(username, email, bio, currentPassword, newPassword);
+  }
+
+  const logout = async () => {
+    try {
+      const res = await api.post("/auth/logout");
+      console.log(res.data);
+      console.log("logged out");
+      router.push('/');
+    } catch (error) {
+      console.log("error:", error);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -36,14 +62,29 @@ const EditProfile = () => {
       />
       <TextInput
         style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Password"
+        value={newPassword}
+        onChangeText={setNewPassword}
+        placeholder="New Password"
         secureTextEntry
       />
-      <TouchableOpacity style={styles.saveButton}>
+      <TextInput
+        style={styles.input}
+        value={currentPassword}
+        onChangeText={setCurrentPassword}
+        placeholder="Current Password"
+        secureTextEntry
+      />
+      <TouchableOpacity style={styles.saveButton} onPress={() => {EditProfile()}}>
         <Text style={styles.saveText}>Save</Text>
       </TouchableOpacity>
+      {
+        success && <View style={styles.successBox}><Text style={styles.successText}>Profile updated successfully!</Text></View>
+      }
+      <View style={styles.view}>
+      <TouchableOpacity style={styles.logoutButton}>
+        <Text style={styles.logoutText} onPress={() => {logout()}}>Logout</Text>
+      </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -88,6 +129,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  successText: {
+    alignItems: 'center',
+    fontSize: 16,
+    color: Colors.choco,
+  },
+  successBox: {
+    backgroundColor: Colors.savoy,
+    padding: 10,
+    marginTop: 20
+  },
+  logoutButton: {
+    backgroundColor: '#6A4E37',
+    padding: 15,
+    marginVertical: 100,
+    width: '40%',
+    alignItems: 'center',
+    borderRadius: 44
+  },
+  logoutText: {
+    color: Colors.background,
+  },
+  view: {
+    flex: 1,
+    alignItems: 'center'
+  }
 });
 
 export default EditProfile;

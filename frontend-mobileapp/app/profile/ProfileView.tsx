@@ -52,11 +52,23 @@ const ProfileView = () => {
   const getBookCollection = async () => {
     try {
       const res = await api.get(`/books/${profileId}/bookList`);
-      console.log("bc current: ", res.data);
+      ////console.log("bc current: ", res.data);
       const data = res.data.bookCollection;
-      console.log("bc current data: ", Array.isArray(res.data));
+      ////console.log("bc current data: ", Array.isArray(res.data));
       setBookCollection(data);
       console.log("bc now: ", bookCollection);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const sendBorrowRequest = async (bookId: string) => {
+    try {
+      console.log("profileId, bookId", profileId, bookId);
+      const res = await api.post(`/books/${profileId}/borrowBook/${bookId}`);
+      console.log(res.data);
+      console.log(res.status);
+      console.log("borrow request sent");
     } catch (error) {
       console.error(error);
     }
@@ -69,21 +81,25 @@ const ProfileView = () => {
   }, []);
 
   useEffect(() => {
-    console.log('Updated book collection:', bookCollection);
+    //console.log('Updated book collection:', bookCollection);
+    console.log('Updated book collection:');
   }, [bookCollection]);
 
   const renderBookItem = ({ item }: { item: Book }) => (
-    <TouchableOpacity style={styles.bookItem}>
+    <TouchableOpacity style={styles.bookItem}
+    onPress={() => { router.push(`/profile/BookDetails?bookId=${item._id.toString()}`)}}
+    >
       <Image style={styles.bookImage} />
       <View style={styles.bookDetails}>
         <Text style={styles.bookTitle}>{item.title}</Text>
         <Text style={styles.bookAuthor}>{item.author.join(", ")}</Text>
       </View>
       <TouchableOpacity style={styles.borrowButton}>
-        <Text style={styles.borrowButtonText}>Borrow</Text>
+        <Text style={styles.borrowButtonText} onPress={() => sendBorrowRequest(item._id)}>Borrow</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
+  //console.log("item._id", item._id);
 
   return (
     <View style={styles.container}>

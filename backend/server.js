@@ -7,6 +7,7 @@ import cors from 'cors';
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import bookRoutes from "./routes/bookRoutes.js"
+import notificationRoutes from "./routes/notificationRoutes.js"
 
 
 import connectMongoDB from "./db/connectMongoDB.js";
@@ -32,6 +33,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/books", bookRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 
 const PORT = process.env.PORT || 5000;

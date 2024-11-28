@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Alert, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import { router, useRouter } from 'expo-router';
 import api from '@/utils/api';
+import moment from 'moment';
 
 
 type Book = {
@@ -103,17 +104,23 @@ const ProfileScreen = () => {
     }
   }
 
- /* useEffect(() => {
-    getBookCollection();
-    getLentBook();
-    getBorrowedBook();
-    console.log('bcccc:', bookCollection);
-  }, []);*/
+  const returnBook = async (bookId: string) => {
+    try {
+      console.log("bookId", bookId);
+      const res = await api.put('/books/returnBook', { bookId });
+      console.log("returnBook res: ", res);
+      console.log("returnBook res data: ", res.data);
+      await getBookCollection();
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   useEffect(() => {
     console.log('Updated book collection:', bookCollection);
   }, [bookCollection, lentBooks, borrowedBooks]);
-
+/*
   const handleAddBook = () => {
     Alert.alert(
       "How do you want to add your books?",
@@ -126,20 +133,28 @@ const ProfileScreen = () => {
       ],
       { cancelable: true }
     );
-  };
+  };*/
   console.log('meee:');
+  const calculateDaysSinceAdded = (bookAddedDate) => {
+    if (!bookAddedDate) return "Unknown date"; // Handle missing dates
+    const addedDate = moment(bookAddedDate);
+    if (!addedDate.isValid()) return "Invalid date"; // Handle invalid dates
+    const today = moment();
+    const daysPassed = today.diff(addedDate, 'days');
+    return daysPassed > 0 ? `${daysPassed} days ago` : "Today";
+};
 
   const renderBookItem = ({ item }: { item: Book }) => (
     <View style={styles.bookItem}>
       <View style={styles.bookImage} />
-      <TouchableOpacity style={styles.bookDetails}>
+      <TouchableOpacity style={styles.bookDetails} onPress={() => { router.push(`/profile/BookDetails?bookId=${item._id.toString()}`)}}>
         <Text style={styles.bookTitle}>{item.title}</Text>
         <Text style={styles.bookAuthor}>{item.author.join(", ")}</Text>
         {item.bookType !== 'myBook' && (
           (item.bookType === 'lent' || item.bookType === 'lentBook') ? (
           <Text style={styles.bookDate}>Lent on: {item.bookAdded}</Text>
           ) : item.bookType === 'borrow' || item.bookType === 'borrowedBook' ? (
-          <Text style={styles.bookDate}>Borrowed on: {item.bookAdded}</Text>
+          <Text style={styles.bookDate}>Borrowed {calculateDaysSinceAdded(item.bookAdded)}</Text>
           ) : null
         )}
       </TouchableOpacity>
@@ -151,7 +166,7 @@ const ProfileScreen = () => {
             </TouchableOpacity>
           ) : item.bookType === 'borrow' || item.bookType === 'borrowedBook' ? (
             <TouchableOpacity style={styles.lendButton}>
-              <Text style={styles.lendButtonText}>Return</Text>
+              <Text style={styles.lendButtonText} onPress={() => {returnBook(item._id)}}>Return</Text>
             </TouchableOpacity>
           ) : null
         )}
@@ -159,35 +174,22 @@ const ProfileScreen = () => {
     </View>
   );
 
-  const renderLentBookItem = ({ item }: { item: Book }) => (
-    <View style={styles.bookItem}>
-      <Image source={{ }} style={styles.bookImage} />
-      <View style={styles.bookDetails}>
-        <Text style={styles.bookTitle}>{item.title}</Text>
-        <Text style={styles.bookAuthor}>{item.author}</Text>
-        {item.bookType !== 'myBook' && (
-          <Text style={styles.bookDate}>Lent on: {item.bookAdded}</Text>
-        )}
-      </View>
-      <TouchableOpacity style={styles.notifyButton}>
-        <Text style={styles.notifyButtonText}>Notify</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const [isModalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
 
-  const renderBorrowedBookItem = ({ item }: { item: BorrowedBook }) => (
-    <View style={styles.bookItem}>
-      <Image source={{ uri: item.image }} style={styles.bookImage} />
-      <View style={styles.bookDetails}>
-        <Text style={styles.bookTitle}>{item.title}</Text>
-        <Text style={styles.bookAuthor}>{item.author}</Text>
-        <Text style={styles.bookDate}>Borrowed on: {item.dateBorrowed}</Text>
-      </View>
-      <TouchableOpacity style={styles.giveBackButton}>
-        <Text style={styles.giveBackButtonText}>Give Back</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const openModal = () => setModalVisible(true);
+  const closeModal = () => setModalVisible(false);
+
+  const options = [
+    { id: 1, label: 'Option 1', action: () => console.log('Option 1 selected') },
+    { id: 2, label: 'Option 2', action: () => console.log('Option 2 selected') },
+    { id: 3, label: 'Option 3', action: () => console.log('Option 3 selected') },
+  ];
+
+  const handleOptionPress = (route: string) => {
+    setModalVisible(false);
+    router.push(route);
+  };
 
   return (
     <View style={styles.container}>
@@ -213,8 +215,8 @@ const ProfileScreen = () => {
 
       {/* Edit Button Container */}
       <View style={styles.editButtonContainer}>
-        <TouchableOpacity style={styles.editButton}>
-          <Text style={styles.editButtonText}>Edit</Text>
+        <TouchableOpacity style={styles.editButton} onPress={() => { router.push(`/profile/EditProfile`)}}>
+          <Text style={styles.editButtonText} >Edit</Text>
         </TouchableOpacity>
       </View>
 
@@ -224,6 +226,43 @@ const ProfileScreen = () => {
         <Text style={styles.username}>@{formData.username}</Text>
         <Text style={styles.bio}>{formData.bio}</Text>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>How do you want to add your books?</Text>
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => handleOptionPress('/profile/AddBooksManually')}
+            >
+              <Text style={styles.optionText}>Manually</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => handleOptionPress('/profile/viewMyProfile')}
+            >
+              <Text style={styles.optionText}>Image</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => handleOptionPress('/profile/AddBooksISBN')}
+            >
+              <Text style={styles.optionText}>ISBN Scan</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* Navigation Bar */}
       <View style={styles.navBar}>
@@ -243,7 +282,7 @@ const ProfileScreen = () => {
               activeTab === 'lent' && styles.highlighted,
             ]}>Lent</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleAddBook}>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
           <Text style={styles.navItem}>Add+</Text>
         </TouchableOpacity>
       </View>
@@ -482,6 +521,66 @@ const styles = StyleSheet.create({
   giveBackButtonText: {
     color: Colors.background,
     fontWeight: 'bold',
+  },
+  button: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: Colors.gray,
+    width: '80%',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  optionButton: {
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+  },
+  optionText: {
+    fontSize: 16,
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  cancelButton: {
+    marginTop: 20,
+    backgroundColor: Colors.savoy,
+    padding: 10,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

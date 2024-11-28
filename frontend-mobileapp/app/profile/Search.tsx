@@ -165,7 +165,12 @@ useEffect(() => {
 */
 
   return (
+    
     <View style={styles.container}>
+      <View style={styles.bar}>
+        <Text style={styles.barTitle}>BookQuest</Text>
+      </View>
+      <View style={styles.containerBody}>
       <View style={styles.searchBar}>
         <TouchableOpacity onPress={() => router.push('/profile/ProfileView')}>
           <Text style={styles.backArrow}>←</Text>
@@ -184,7 +189,7 @@ useEffect(() => {
       keyExtractor={(item => item._id.toString())}
       ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>No search result available.</Text>}
       />
-
+    </View>
     </View>
   );
 };
@@ -204,7 +209,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+    
+  },
+  containerBody:{
     paddingHorizontal: 20,
+  },
+  bar: {
+    backgroundColor: Colors.choco,
+    padding: 16,
+    paddingTop: 50,
+    paddingBottom: 10,
+    paddingHorizontal: null
+  },
+  barTitle: {
+    fontSize: 40,
+    color: Colors.background,
+    fontFamily: 'CustomFont',
+    textAlign: 'left',
+    marginBottom: 10,
   },
   searchBar: {
     flexDirection: 'row',
