@@ -9,6 +9,7 @@ type Book = {
   author: string;
   image: string;
   dateBorrowed: string;
+  borrowedBy: string;
 };
 
 const books: Book[] = [
@@ -27,6 +28,7 @@ const ProfileScreen = () => {
         <Text style={styles.bookTitle}>{item.title}</Text>
         <Text style={styles.bookAuthor}>{item.author}</Text>
         <Text style={styles.bookDate}>Borrowed on: {item.dateBorrowed}</Text>
+        <Text style={styles.bookBorrowedBy}>Borrowed by: {item.borrowedBy}</Text> {/* Display username */}
       </View>
       <TouchableOpacity style={styles.giveBackButton}>
         <Text style={styles.giveBackButtonText}>Give Back</Text>
@@ -214,6 +216,11 @@ const styles = StyleSheet.create({
   bookDate: {
     fontSize: 12,
     color: Colors.choco,
+  },
+  bookBorrowedBy: {
+    fontSize: 12,
+    color: Colors.choco,
+    fontStyle: 'italic', 
   },
   giveBackButton: {
     backgroundColor: Colors.choco,
