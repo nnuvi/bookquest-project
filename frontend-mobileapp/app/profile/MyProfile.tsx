@@ -201,16 +201,19 @@ const ProfileScreen = () => {
           style={styles.profilePic}
         />
         </View>
-        <View style={styles.infoBoxes}>
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>100</Text>
+        <View style={styles.infoBox}>
+            <Text style={styles.infoText}>{bookCount}</Text> {/* Dynamic book count logic*/}
             <Text style={styles.infoLabel}>Books</Text>
           </View>
-          <TouchableOpacity style={styles.infoBox} >
-            <Text style={styles.infoText}>19</Text>
+
+          {/* Friends Count logic*/}
+          <TouchableOpacity
+            style={styles.infoBox}
+            onPress={() => navigation.navigate('Friends')}
+          >
+            <Text style={styles.infoText}>{friendCount}</Text> {/* Dynamic friend count */}
             <Text style={styles.infoLabel}>Friends</Text>
           </TouchableOpacity>
-        </View>
       </View>
 
       {/* Edit Button Container */}
