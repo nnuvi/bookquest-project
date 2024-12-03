@@ -20,7 +20,8 @@ const books: Book[] = [
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
-
+ const [bookCount, setBookCount] = useState(books.length); //Add in backend
+  const [friendCount, setFriendCount] = useState(19)
   const renderBookItem = ({ item }: { item: Book }) => (
     <View style={styles.bookItem}>
       <Image source={{ uri: item.image }} style={styles.bookImage} />
