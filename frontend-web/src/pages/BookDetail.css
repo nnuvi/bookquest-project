@@ -1,28 +1,71 @@
 /* src/pages/BookDetail.css */
-
+/* Container for the book details page */
 .book-detail-container {
-    padding: 40px;
-    max-width: 700px;
-    margin: auto;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f9f3e7;
+    height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-.book-cover {
-    width: 150px;
-    height: 200px;
+/* Back button styling */
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: #5c3d2e;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.back-button:hover {
+    background-color: #4a2d22;
+}
+
+/* Content area for book details */
+.book-detail-content {
+    background: #d5c3a1;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Book image styling */
+.book-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
     margin-bottom: 20px;
 }
 
-.book-title {
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #333;
+/* Book information text */
+.book-info p {
+    font-size: 1.2rem;
+    margin: 10px 0;
+    color: #4a2d22;
 }
 
-.book-description {
-    font-size: 1em;
-    color: #666;
-    line-height: 1.5;
+/* Borrow button styling */
+.borrow-button {
+    background-color: #5c3d2e;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.borrow-button:hover {
+    background-color: #4a2d22;
 }

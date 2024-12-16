@@ -1,5 +1,72 @@
 /* src/pages/ChooseProfilePic.css */
 
-.choose-pic-container {
+/* Container for the Choose Profile Pic Page */
+.choose-profile-pic-container {
+    background-color: #f9f3e7;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
     padding: 20px;
+}
+
+/* Header Section */
+.choose-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.cancel-button,
+.done-button {
+    background-color: #5c3d2e;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.cancel-button:hover,
+.done-button:hover {
+    background-color: #4a2d22;
+}
+
+.choose-header h2 {
+    font-size: 1.5rem;
+    color: #5c3d2e;
+}
+
+/* Gallery Grid */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.gallery-item {
+    width: 100px;
+    height: 100px;
+    background-color: #ccc;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.gallery-item.selected {
+    border: 2px solid #5c3d2e;
+    box-shadow: 0 0 10px rgba(92, 61, 46, 0.5);
 }

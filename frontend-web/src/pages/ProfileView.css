@@ -1,14 +1,87 @@
 /* ProfileView.css */
 
-/* Container for the entire Profile View page */
+/* Container for Profile View Page */
 .profile-view-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background-color: #f4f4f9;
-    min-height: 100vh;
-  }
-  
-  /* Profile header */
+  background-color: #f9f3e7;
+  height: 100vh;
+  padding: 20px;
+}
+
+/* Header Section */
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #d5c3a1;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.profile-pic {
+  width: 80px;
+  height: 80px;
+  background-color: #ccc;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: #5c3d2e;
+}
+
+.profile-info {
+  text-align: center;
+}
+
+.connect-button {
+  background-color: #5c3d2e;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.connect-button:hover {
+  background-color: #4a2d22;
+}
+
+/* Books Section */
+.profile-books {
+  margin-top: 20px;
+}
+
+.book-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+}
+
+.book-card {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.book-image {
+  height: 100px;
+  background-color: #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.borrow-button {
+  background-color: #5c3d2e;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.borrow-button:hover {
+  background-color: #4a2d22;
+}

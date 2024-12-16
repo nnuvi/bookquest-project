@@ -59,6 +59,10 @@ const bookSchema = new mongoose.Schema({
           type:String,
           default: ''
      },
+     borrowedBy: {
+          type: String,
+          default: ''
+     },
 
 }, {timestamps: true});
 

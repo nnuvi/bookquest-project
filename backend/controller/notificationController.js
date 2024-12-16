@@ -6,7 +6,6 @@ import moment from "moment";
 export const allNotifications = async (req, res) => {
      try {
           const userId = req.user._id;
-          console.log(userId);
           const notifications = await Notification.find({ to:userId}).sort({ createdAt: -1 });
           console.log(notifications);
           if(!notifications) {
@@ -44,45 +43,30 @@ export const reminderNotification = async (req, res) => {
           const today = new Date();
           const user = await User.findById(userId);
           if(!user) return res.status(400).json({message: "User not Found"});
-          //console.log("user", user);
-          //console.log("user.bookCollection, ", user.bookCollection);
           const userBooks = await User.findById(userId).populate('bookCollection');
-          //console.log(userBooks.bookCollection);
           const borrowedBooks = userBooks.bookCollection.filter(book => {
-               console.log(book);
-               console.log(book.bookType); // Log each book in the collection to ensure the structure is correct
                return book.bookType === 'borrowedBook';
           });
-          console.log(borrowedBooks);
-          const borrowedBookDetails = borrowedBooks.map(book => book._id);
-          console.log("Books borrowed by user:", borrowedBookDetails);
-
           borrowedBooks.forEach(async (book) => {
-               console.log("j",book);
-               
-                   // Check if the book has an `addedDate` or `createdAt` field
-                   const bookAddedDate = moment(book.bookAdded || book.createdAt); // Fallback to createdAt if addedDate doesn't exist
+                   const bookAddedDate = moment(book.bookAdded || book.createdAt);
                    const today = moment();
-                   const daysPassed = today.diff(bookAddedDate, 'days'); // Calculate days passed
-   
-                   console.log("Days passed: ", daysPassed);
-
+                   const daysPassed = today.diff(bookAddedDate, 'days'); 
                    const notificationSent = await Notification.findOne({
                     to: user._id,
-                    message: `Reminder: It's been 15 days since you added the book "${book.title}". Consider returning it.`});
+                    message: `Reminder: It's been 15 days since you added the book "${book.title}". 
+                              Consider returning it.`});
 
-                    console.log("notification sent", notificationSent);
+                    console.log("notification sent");
                     if(notificationSent){
                          console.log("Notification already sent");
                          return res.status(200).json({ message: "Reminder already Sent" });
                     }
-
-                   if (daysPassed === 0) {
-                       // Send reminder notification
+                   if (daysPassed === 15) {
                        const reminderNotification = new Notification({
                            from: user._id, // System or admin
                            to: user._id, // Notify the user
-                           message: `Reminder: It's been 15 days since you added the book "${book.title}". Consider returning it.`,
+                           message: `Reminder: It's been 15 days since you added the book 
+                                     "${book.title}". Consider returning it.`,
                            type: "reminder",
                        });
                        await reminderNotification.save();
@@ -90,8 +74,8 @@ export const reminderNotification = async (req, res) => {
                        return res.status(200).json({ message: "Reminder Sent" });
                    }
            });
-          
      } catch (error) {
           res.status(400).json({ error: error.message });
      }
 }
+

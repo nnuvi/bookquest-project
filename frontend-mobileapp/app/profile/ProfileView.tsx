@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import { router } from 'expo-router';
 import api from '@/utils/api';
+import { useUser } from './getMe';
 
 type Book = {
   _id: string;
@@ -17,6 +18,7 @@ type Book = {
   isbn: number | null; // isbn can be null
   bookAdded: Date | null;
   bookType: string;
+  borrowedBy: string;
 };
 
 const ProfileView = () => {
@@ -30,6 +32,7 @@ const ProfileView = () => {
     username: "",
     bio: "",
   });
+  const {userId} = useUser();
   console.log("profileid: ", profileId);
 
   const handleConnectToggle = () => {
@@ -62,12 +65,14 @@ const ProfileView = () => {
     }
   }
 
+  const [sentRequest, setSentRequest] = useState(false);
+
   const sendBorrowRequest = async (bookId: string) => {
     try {
-      console.log("profileId, bookId", profileId, bookId);
       const res = await api.post(`/books/${profileId}/borrowBook/${bookId}`);
       console.log(res.data);
       console.log(res.status);
+      setSentRequest(true);
       console.log("borrow request sent");
     } catch (error) {
       console.error(error);
@@ -85,6 +90,8 @@ const ProfileView = () => {
     console.log('Updated book collection:');
   }, [bookCollection]);
 
+  
+
   const renderBookItem = ({ item }: { item: Book }) => (
     <TouchableOpacity style={styles.bookItem}
     onPress={() => { router.push(`/profile/BookDetails?bookId=${item._id.toString()}`)}}
@@ -95,7 +102,17 @@ const ProfileView = () => {
         <Text style={styles.bookAuthor}>{item.author.join(", ")}</Text>
       </View>
       <TouchableOpacity style={styles.borrowButton}>
-        <Text style={styles.borrowButtonText} onPress={() => sendBorrowRequest(item._id)}>Borrow</Text>
+      {sentRequest? 
+        (
+          <Text style={styles.borrowButtonText} >Requested</Text> 
+        ) : item.borrowedBy === userId? 
+        (
+          <Text style={styles.borrowButtonText} >Return</Text>
+        ) :
+        (
+          <Text style={styles.borrowButtonText} onPress={() => sendBorrowRequest(item._id)}>Borrow</Text>
+        ) 
+      }
       </TouchableOpacity>
     </TouchableOpacity>
   );

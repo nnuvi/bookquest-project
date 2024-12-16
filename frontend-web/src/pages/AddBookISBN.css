@@ -1,5 +1,61 @@
 /* src/pages/AddBookISBN.css */
 
+/* Container for Add Books by ISBN */
 .add-book-isbn-container {
-    padding: 40px;
+    background-color: #d5c3a1;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Header Section */
+.add-book-isbn-container h2 {
+    font-size: 1.5rem;
+    color: #5c3d2e;
+    margin-bottom: 20px;
+}
+
+/* Scanner Section */
+.scanner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.barcode-box {
+    width: 200px;
+    height: 200px;
+    border: 2px dashed #5c3d2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #5c3d2e;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.scanner input {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 250px;
+    text-align: center;
+}
+
+.scan-button {
+    background-color: #5c3d2e;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.scan-button:hover {
+    background-color: #4a2d22;
 }

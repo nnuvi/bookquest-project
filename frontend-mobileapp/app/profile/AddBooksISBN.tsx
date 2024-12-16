@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, Button } from 'react-native';
 import { Camera } from 'expo-camera';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+//import { BarCodeScanner } from 'expo-barcode-scanner';
 import api from '@/utils/api';
 
 export default function ISBNScannerScreen() {
@@ -15,40 +15,30 @@ export default function ISBNScannerScreen() {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     };
-
     getPermissions();
   }, []);
-
   // Handle the scanned barcode
-  const handleBarcodeScanned = ({ type, data }) => {
-    console.log('Scanned type:', type);
-    console.log('Scanned data:', data);
+  const handleBarcodeScanned = ({ type, data }: {type: any, data: any}) => {
     setScanned(true);
-    setIsbn(data); // Set the scanned ISBN
+    setIsbn(data);
     Alert.alert('Scanned ISBN', `ISBN: ${data}`);
     importByISBN(data);
   };
-
   // Reset the scanner to scan again
   const scanAgain = () => {
     setScanned(false);
     setIsbn(null);
   };
-
-  // If camera permission is not granted, show a message
   if (hasPermission === null) {
     return <Text>Requesting for camera permission...</Text>;
   }
-
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
   }
-
-  const importByISBN = async(isbn) => {
+  const importByISBN = async(isbn: any) => {
     try {
     console.log("isbn", isbn);
     const res = await api.post(`/books/importBooksByISBN`,{isbn})
-    console.log(res.data);
     Alert.alert('Imported Books', `Imported ${res.data.length} books`);
     } catch (error) {
       console.error(error);
@@ -56,9 +46,8 @@ export default function ISBNScannerScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    {/*<View style={styles.container}>
       <Text style={styles.title}>Scan ISBN Barcode</Text>
-
       {!scanned ? (
         <BarCodeScanner
           onBarCodeScanned={scanned ? undefined : handleBarcodeScanned}
@@ -74,7 +63,7 @@ export default function ISBNScannerScreen() {
           <Button title="Scan Again" onPress={scanAgain} />
         </View>
       )}
-    </View>
+    </View>*/}
   );
 }
 

@@ -45,10 +45,18 @@ const HomeScreen = () => {
       console.log('Books after setting state:', books);
     }, []);
 
+    const onPressBookDetails = (id) => {
+      console.log('Book ID:', id);
+      router.setParams({bookId: id});
+      router.push('/profile/BookDetails');
+    }
   const renderBookItem = ({ item }: { item: Book }) => (
     <TouchableOpacity
       style={styles.bookContainer}
-      onPress={() => { router.push(`/profile/BookDetails?bookId=${item._id.toString()}`)}}
+      onPress={() => router.push({
+        pathname: '/profile/[bookId]',
+        params: { bookId: item._id },
+      })}
     >
       <Image source={{ uri: item.image }} style={styles.bookImage} />
       <Text style={styles.bookTitle}>{item.title}</Text>

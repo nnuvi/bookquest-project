@@ -19,7 +19,13 @@ type Book = {
   isbn: number | null; // isbn can be null
   bookAdded: Date | null;
   bookType: string;
+  borrowedBy: String;
 };
+
+type User = {
+  _id: string;
+  username: string;
+}
 
 
 type BorrowedBook = {
@@ -30,6 +36,7 @@ type BorrowedBook = {
   dateBorrowed: string;
 };
 
+//const router = useRouter();
 
 const ProfileScreen = () => {
   const route = useRouter();
@@ -43,6 +50,9 @@ const ProfileScreen = () => {
   const [ bookCollection, setBookCollection ] = useState([]);
   const [ lentBooks, setlentBooks ] = useState([]);
   const [ borrowedBooks, setBorrowedBooks ] = useState([]);
+  const [ friendsNo, setFriendsNo] = useState();
+  const [ bookNo, setBookNo] = useState(0);
+  const [ bb, setbb ] = useState([]);
 
 
   const getMe = async() => {
@@ -51,6 +61,8 @@ const ProfileScreen = () => {
       console.log("user current: ", res.data);
       const data = res.data;
       console.log("user current data: ", data);
+      setFriendsNo(res.data.friends.length);
+      console.log('friends:', friendsNo);
       setFormData(data);
       return data;
     } catch (error) {
@@ -66,12 +78,14 @@ const ProfileScreen = () => {
     console.log('meee:', formData);
   }, []);
 
+  
   const getBookCollection = async () => {
     try {
       const res = await api.get('/books/myBooks');
       console.log("bc current: ", res.data);
       const data: Book[] = res.data.bookCollection;
       console.log("bc current data: ", data);
+      setBookNo(res.data.bookCollection.length);
       setBookCollection(data);
     } catch (error) {
       console.error(error);
@@ -108,10 +122,9 @@ const ProfileScreen = () => {
     try {
       console.log("bookId", bookId);
       const res = await api.put('/books/returnBook', { bookId });
-      console.log("returnBook res: ", res);
-      console.log("returnBook res data: ", res.data);
+      console.log("res: ", res);
+      console.log("res data: ", res.data);
       await getBookCollection();
-
     } catch (error) {
       console.error(error);
     }
@@ -119,23 +132,10 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     console.log('Updated book collection:', bookCollection);
-  }, [bookCollection, lentBooks, borrowedBooks]);
-/*
-  const handleAddBook = () => {
-    Alert.alert(
-      "How do you want to add your books?",
-      "",
-      [
-        { text: "Manually", onPress: () => router.push('/profile/AddBooksManually') },
-        { text: "Image", onPress: () => router.push('/profile/viewMyProfile') },
-        { text: "ISBN Scan", onPress: () => router.push('/profile/AddBooksISBN') },
-        { text: "Cancel", style: "cancel" }
-      ],
-      { cancelable: true }
-    );
-  };*/
+  }, [bookCollection, lentBooks, borrowedBooks, activeTab]);
+
   console.log('meee:');
-  const calculateDaysSinceAdded = (bookAddedDate) => {
+  const calculateDaysSinceAdded = (bookAddedDate: moment.MomentInput) => {
     if (!bookAddedDate) return "Unknown date"; // Handle missing dates
     const addedDate = moment(bookAddedDate);
     if (!addedDate.isValid()) return "Invalid date"; // Handle invalid dates
@@ -152,9 +152,9 @@ const ProfileScreen = () => {
         <Text style={styles.bookAuthor}>{item.author.join(", ")}</Text>
         {item.bookType !== 'myBook' && (
           (item.bookType === 'lent' || item.bookType === 'lentBook') ? (
-          <Text style={styles.bookDate}>Lent on: {item.bookAdded}</Text>
+          <Text style={styles.bookDate}>Lent {calculateDaysSinceAdded(item.bookAdded)} </Text>
           ) : item.bookType === 'borrow' || item.bookType === 'borrowedBook' ? (
-          <Text style={styles.bookDate}>Borrowed {calculateDaysSinceAdded(item.bookAdded)}</Text>
+          <Text style={styles.bookDate}>Borrowed {calculateDaysSinceAdded(item.bookAdded)} </Text>
           ) : null
         )}
       </TouchableOpacity>
@@ -180,12 +180,6 @@ const ProfileScreen = () => {
   const openModal = () => setModalVisible(true);
   const closeModal = () => setModalVisible(false);
 
-  const options = [
-    { id: 1, label: 'Option 1', action: () => console.log('Option 1 selected') },
-    { id: 2, label: 'Option 2', action: () => console.log('Option 2 selected') },
-    { id: 3, label: 'Option 3', action: () => console.log('Option 3 selected') },
-  ];
-
   const handleOptionPress = (route: string) => {
     setModalVisible(false);
     router.push(route);
@@ -203,12 +197,12 @@ const ProfileScreen = () => {
         </View>
         <View style={styles.infoBoxes}>
           <View style={styles.infoBox}>
-            <Text style={styles.infoText}>100</Text>
+            <Text style={styles.infoText}>{bookNo}</Text>
             <Text style={styles.infoLabel}>Books</Text>
           </View>
           <TouchableOpacity style={styles.infoBox} >
-            <Text style={styles.infoText}>19</Text>
-            <Text style={styles.infoLabel}>Friends</Text>
+            <Text style={styles.infoText}>{friendsNo}</Text>
+            <Text style={styles.infoLabel} onPress={() => router.push('/profile/MyFriendlist')}>Friends</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -250,7 +244,6 @@ const ProfileScreen = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.optionButton}
-              onPress={() => handleOptionPress('/profile/AddBooksISBN')}
             >
               <Text style={styles.optionText}>ISBN Scan</Text>
             </TouchableOpacity>

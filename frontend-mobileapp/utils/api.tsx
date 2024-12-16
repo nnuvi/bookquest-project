@@ -7,9 +7,6 @@ const api = axios.create({
   baseURL: apiUrl, 
   responseType: 'json',
   withCredentials: true,
- /* headers: {
-     'Content-Type': 'application/json',
-  },*/  
 });
 
 // Add a response interceptor

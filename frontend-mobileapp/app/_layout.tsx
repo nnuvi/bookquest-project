@@ -1,4 +1,5 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import * as React from 'react';
+import { DarkTheme, DefaultTheme, ThemeProvider, NavigationContainer } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -10,6 +11,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
+import { registerRootComponent } from "expo";
+import { ExpoRoot } from "expo-router";
+
+
+//const Stack = createNativeStackNavigator();
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -42,9 +48,10 @@ export default function RootLayout() {
   }
 
   return (
-    <UserProvider>
+    
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+      <UserProvider>
+    <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="auth/login" options={{ headerBackTitle: 'Login', headerShown: false }} />
         <Stack.Screen name="auth/signup" options={{ headerBackTitle: 'SignUp', headerShown: false }} />
@@ -64,8 +71,11 @@ export default function RootLayout() {
           <Stack.Screen name="profile/Search" options={{ headerShown: false }} />
           <Stack.Screen name="profile/Notifications" options={{ headerShown: false }} />
           <Stack.Screen name="profile/EditProfile" options={{ headerShown: false }} />
+          <Stack.Screen name="profile/BookDetails" options={{ headerShown: false }} />
+          <Stack.Screen name="profile/[bookId]" options={{ headerShown: false }} />
       </Stack>
+      </UserProvider>
     </ThemeProvider>
-    </UserProvider>
   );
 }
+
