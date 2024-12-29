@@ -142,7 +142,7 @@ const ProfileScreen = () => {
     const today = moment();
     const daysPassed = today.diff(addedDate, 'days');
     return daysPassed > 0 ? `${daysPassed} days ago` : "Today";
-};
+  };
 
   const renderBookItem = ({ item }: { item: Book }) => (
     <View style={styles.bookItem}>
@@ -204,7 +204,7 @@ const ProfileScreen = () => {
             <Text style={styles.infoText}>{friendsNo}</Text>
             <Text style={styles.infoLabel} onPress={() => router.push('/profile/MyFriendlist')}>Friends</Text>
           </TouchableOpacity>
-        </View>
+          </View>
       </View>
 
       {/* Edit Button Container */}

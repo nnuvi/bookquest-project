@@ -1,7 +1,12 @@
 import mongoose from "mongoose";
 
-const reminderSchema = new mongoose.Schema({
-     to: {
+const borrowBookSchema = new mongoose.Schema({
+     borrowedFrom: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+     },
+     borrowedTo: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User',
           required: true,
@@ -11,21 +16,16 @@ const reminderSchema = new mongoose.Schema({
           ref: 'Books',
           required: true,
      },
-     type: {
-          type: String,
-          enum: ['borrow', 'lent'],
-          required: true,
-     },
-     daysPassed: {
+     borrowedDate: {
           type: Date,
           default: Date.now,
      },
-     message: {
+     status: {
           type: String,
-          required: true,
+          enum: ['borrowed', 'returned'],
      }
 }, {timestamps: true});
 
-const Reminder = mongoose.model('Reminder', reminderSchema);
+const BorrowBook = mongoose.model('BorrowBook', borrowBookSchema);
 
-export default Reminder;
+export default BorrowBook;

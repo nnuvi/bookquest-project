@@ -1,31 +1,30 @@
 import mongoose from "mongoose";
 
-const reminderSchema = new mongoose.Schema({
+const messageSchema = new mongoose.Schema({
+     from: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+     },
      to: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User',
           required: true,
      },
-     bookId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Books',
-          required: true,
-     },
-     type: {
-          type: String,
-          enum: ['borrow', 'lent'],
-          required: true,
-     },
-     daysPassed: {
-          type: Date,
-          default: Date.now,
-     },
      message: {
           type: String,
           required: true,
+     },
+     sentTime: {
+          type: Date,
+          default: Date.now,
+     },
+     read: {
+          type: Boolean,
+          default: false,
      }
 }, {timestamps: true});
 
-const Reminder = mongoose.model('Reminder', reminderSchema);
+const Message = mongoose.model('Message', messageSchema);
 
-export default Reminder;
+export default Message;
