@@ -4,7 +4,9 @@ import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors'
 import { retroFont } from '@/utils/fontAdd'
 import api from '@/utils/api'
-import axios from 'axios'
+import Button from '@/components/common/Button';
+import LogoText from '@/components/common/LogoText';
+import StatusBar from '@/components/common/StatusBar';
 
 const Page = () => {
   const [loading, setLoading] = useState(false);
@@ -36,7 +38,6 @@ const Page = () => {
               setError('Something went wrong in Routing.'); 
             }
           
-
         } catch (err:any) {
           if (err.response && err.response.data && err.response.data.message) {
             setError(err.response.data.message);  // Backend error message
@@ -89,15 +90,10 @@ const Page = () => {
  
 }
 
-/*const loadSignup = setTimeout(() => {
-    setLoading(true);
-    handleSignup
-  }, 2000);*/
-
-
   return (
     <View style={styles.container}>
       {/* Full Page Transparent Loading Indicator */}
+      <StatusBar />
       <Modal visible={loading} transparent animationType="fade">
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.choco} />
@@ -105,14 +101,8 @@ const Page = () => {
         </View>
       </Modal>
 
+      <LogoText />
       
-
-      <View style={styles.logoContainer}>
-        <Text style={styles.title}>BookQuest</Text>
-      </View>
-      <View style={styles.space}></View>
-      
-
       <View style={styles.inputContainer}>
        <TextInput
           placeholder="Name"
@@ -153,9 +143,7 @@ const Page = () => {
         />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleSignup} >
-        <Text style={styles.buttonText}>Sign up</Text>
-      </TouchableOpacity>
+      <Button title='Signup' onPress={handleSignup}></Button>
 
       {error && <Text style={styles.errorText}>{error}</Text>}
     </View>

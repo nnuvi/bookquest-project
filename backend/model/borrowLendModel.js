@@ -16,9 +16,12 @@ const borrowBookSchema = new mongoose.Schema({
           ref: 'Books',
           required: true,
      },
-     borrowedDate: {
+     borrowDate: {
           type: Date,
           default: Date.now,
+     },
+     returnDate: {
+          type: Date,
      },
      status: {
           type: String,
@@ -26,6 +29,6 @@ const borrowBookSchema = new mongoose.Schema({
      }
 }, {timestamps: true});
 
-const BorrowBook = mongoose.model('BorrowBook', borrowBookSchema);
+const BorrowBooks = mongoose.model('BorrowBook', borrowBookSchema);
 
-export default BorrowBook;
+export default BorrowBooks;

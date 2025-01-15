@@ -2,7 +2,7 @@ import express from 'express';
 import upload from '../middleware/multer.js';
 import { protectRoute } from '../middleware/protectRoute.js';
 import { manualImport, isbnImport, imageImport, getMyBooks, getUserBookList, approveDeclineBorrowBook, 
-     getBookDetails, borrowedBooks, lentBooks, borrowBook, returnBook } from '../controller/bookController.js';
+     getBookDetails, borrowedBooks, lentBooks, borrowBook, returnBook, borrowBookRequest } from '../controller/bookController.js';
 
 
 const router = express.Router();
@@ -20,6 +20,7 @@ router.put("/returnBook/",protectRoute, returnBook);
 router.post("/importBooksByISBN",protectRoute, isbnImport);
 router.post("/importBooksByImage",protectRoute, upload.single('image'), imageImport);
 router.post("/importBooksManually",protectRoute, manualImport);
+router.post("/:profileUserId/bookRequest/:bookId", protectRoute, borrowBookRequest);
 
 
 

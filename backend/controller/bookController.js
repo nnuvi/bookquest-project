@@ -1,7 +1,11 @@
 import User from "../model/userModel.js";
 import Books from "../model/bookModel.js";
-import Tesseract from "tesseract.js";
 import Notification from "../model/notificationModel.js";
+import BookRequest from "../model/bookRequestModel.js";
+import BorrowBooks from "../model/borrowLendModel.js";
+import { verifyIfUserExist, verifyIfBookExist } from "../lib/util/verify.js";
+import Tesseract from "tesseract.js";
+
 //import { preprocessImage } from "../lib/util/preProcessImage.js";
 
 export const manualImport = async (req, res) => {
@@ -95,10 +99,6 @@ export const isbnImport = async (req, res) => {
           res.status(500).json({ message: "Internal Server Error", error: error.message });
      }
 }
-
-import path from "path";
-import {ImageAnnotatorClient} from '@google-cloud/vision';
-import { fileURLToPath } from 'url';
 
 export const imageImport = async (req, res) => {
      try {
@@ -198,7 +198,9 @@ export const getMyBooks = async (req, res) => {
           if(!user) return res.status(400).json({message: "User not Found"});
 
           const getUserBookList = await User.findById(userId).populate('bookCollection').exec();
-          console.log("getUserBookList", getUserBookList);
+          
+          const bookTitles = getUserBookList.bookCollection.map(book => book.title);
+          console.log("Book Titles (mine):", bookTitles);
           
           res.status(200).json(getUserBookList);
      } catch (error) {
@@ -212,18 +214,16 @@ export const getUserBookList = async (req, res) => {
           const userId = req.user._id.toString();
           const profileUserId = req.params.id;
 
-          console.log("User ID from req.user:", userId);
-          console.log("Profile ID from params:", profileUserId);
-
           const user = await User.findById(userId);
-          //console.log("user : ",user );
           if(!user) return res.status(400).json({message: "User not Found"});
 
           const getUserBookList = await User.findById(profileUserId)
           .select('bookCollection')
           .populate('bookCollection')
           .exec();
-          console.log("getUserBookList", getUserBookList);
+
+          const bookTitles = getUserBookList.bookCollection.map(book => book.title);
+          console.log("Book Titles (user):", bookTitles);
 
           res.status(200).json(getUserBookList);
      } catch (error) {
@@ -252,6 +252,255 @@ export const getBookDetails = async (req, res) => {
      }
 }
 
+export const borrowBookRequest = async (req, res) => {
+     try {
+          const userId = req.user._id.toString();
+          const user = await User.findById(userId);
+          if(!user) return res.status(400).json({message: "User not Found"});
+
+          const bookId = req.params.bookId;
+          console.log(bookId);
+          const book = await Books.findById(bookId);
+          if(!book) return res.status(400).json({message: "Book not Found"});
+
+          const profileUserId = req.params.profileUserId;
+          const profileUser = await User.findById(profileUserId);
+          if(!profileUser) return res.status(400).json({message: "User not Found"});
+
+          const isAlreadyBookExist = user.bookCollection.includes(bookId); //book exists
+          if(isAlreadyBookExist) return res.status(400).json({ message: "Book already exist" });
+
+          const requestSent = await BookRequest.findOne({from: userId, to: profileUserId, bookId: bookId, type: 'borrow'});
+          console.log("request sent", requestSent);
+          if(requestSent) return res.status(400).json({message: "Request Sent Already."});
+          const bookRequest = new BookRequest({
+               from: userId,
+               to: profileUserId,
+               bookId: bookId,
+               type: 'borrow',
+          });
+          console.log("book request", bookRequest);
+          const notification = new Notification({
+               from: user._id,
+               to: profileUser._id,
+               message: `<b>${user.fullName}</b> Requested to Borrow the book ${book.title} 
+                         by ${book.author} from you`,
+               type: 'request',
+               book: bookId,
+          });
+          console.log("notification", notification);
+          await bookRequest.save();
+          console.log("book request saved");
+          await notification.save();
+          console.log("notification saved");
+          res.status(200).json({ message: "request to borrow book successful!!!"});
+     } catch (error) {
+          console.error(error);
+          res.status(500).json({ message: "Internal Server Error", error: error.message });
+     }
+}
+
+export const approveDeclineBorrowRequest = async (req, res) => {
+     try {
+          const userId = req.user._id.toString();
+          const user = await User.findById(userId);
+          if(!user) return res.status(400).json({message: "User not Found"});
+
+          const { action, notificationId } = req.body;
+          const notification = await Notification.findById(notificationId);
+          if (!notification) return res.status(404).json({ message: "Notification not found" });
+
+          const {from: requestedUserId, bookId} = notification;
+          const requestedUser = await User.findById(requestedUserId);
+          if(!requestedUser) return res.status(400).json({message: "User not Found"});
+          const book = await Books.findById(bookId);
+          if(!book) return res.status(400).json({message: "Book not Found"});
+
+          const request = await BookRequest.findOne({from: requestedUserId, to: userId, bookId: bookId, type: 'borrow'});
+          if(!request) return res.status(400).json({message: "Request not Found"});
+          
+          if(request.status !== 'requested') return res.status(400).json({message: "Request status is not requested"});
+
+          if(action === 'approved') {
+               const isAlreadyBookExist = requestedUser.bookCollection.includes(book); //book exists
+               if(isAlreadyBookExist) {
+                    request.status = 'declined'
+                    await request.save();
+
+                    const notificationToRequester = new Notification ({
+                         from: user._id,
+                         to: requestedUser._id,//requester
+                         message: `Your request to borrow the book ${book.title} from <b>${user.fullName}</b> 
+                                   has been declined `,
+                         bookId: bookId,
+                         type: 'action'
+                    });
+                    await notificationToRequester.save();
+
+                    notification.message = `Request declined as the other user already has the book`;
+                    notification.type = 'action';
+                    await notification.save();
+
+                    return res.status(200).json({ message: "request to borrow book declined!!!" });
+               } else {
+                    request.status = 'approved'
+                    await request.save();
+
+                    const borrowBook = new BorrowBooks ({
+                         borrowedFrom: user._id,
+                         borrowedTo: requestedUser._id,
+                         bookId: bookId,
+                         borrowDate: new Date(),
+                         status: 'borrowed'
+                    });
+                    await borrowBook.save();
+
+                    const notificationToRequester = new Notification ({
+                         from: user._id,
+                         to: requestedUser._id,
+                         message: `Your request to borrow the book ${book.title} from <b>${user.fullName}</b> has been approved`,
+                         bookId: bookId,
+                         type: 'action'
+                    });
+                    await notificationToRequester.save();
+
+                    notification.message = `Your approved the request from <b>${user.fullName}</b> to borrow the book ${book.title}  by ${book.author}`;
+                    notification.type = 'action';
+                    await notification.save();
+
+                    return res.status(200).json({ message: "request to borrow book approved!!!" });
+               }
+          } else if(action === 'declined') {
+               request.status = 'declined'
+               await request.save();
+               const notificationToRequester = new Notification ({
+                    from: user._id,
+                    to: requestedUser._id,//requester
+                    message: `Your request to borrow the book ${book.title} from <b>${user.fullName}</b> has been declined`,
+                    bookId: bookId,
+                    type: 'action'
+               });
+               await notificationToRequester.save();
+               notification.message = `Your declined the request from <b>${user.fullName}</b> to borrow 
+                                       the book ${book.title}  by ${book.author}`;
+               notification.type = 'action';
+               await notification.save();
+               return res.status(200).json({ message: "request to borrow book declined!!!" });
+          } else {
+               return res.status(400).json({ message: "Invalid action!!!" });
+          }
+     } catch (error) {
+          console.log("error:", error);
+          res.status(500).json({ message: "Internal Server Error", error: error.message });
+     }
+}
+
+export const returnBookRequest = async (req, res) => {
+     try {
+          const userId = req.user._id.toString();
+          const user = await User.findById(userId);
+          if(!user) return res.status(400).json({message: "User not Found"});
+
+          const bookId = req.params.bookId;
+          const book = await Books.findById(bookId);
+          if(!book) return res.status(400).json({message: "Book not Found"});
+
+          const BorrowBookInfo = await BorrowBooks.findOne({bookId: bookId, status: 'borrowed', borrowedTo: userId});
+          if(!BorrowBookInfo) return res.status(400).json({message: "Borrowing details issue"});
+          const bookOwner = await User.findById(BorrowBookInfo.borrowedFrom);
+
+          const requestSent = await BookRequest.findOne({from: userId, to: bookOwner._id, bookId: bookId, type: 'return'});
+          console.log("return request sent", requestSent);
+          if(requestSent) return res.status(400).json({message: "Request Sent Already."});
+
+          const bookReturnRequest = new BookRequest({
+               from: userId,
+               to: bookOwner._id,
+               bookId: bookId,
+               type: 'return',
+          });
+          console.log("book request", bookReturnRequest);
+          const notification = new Notification({
+               from: user._id,
+               to: bookOwner._id,
+               message: `<b>${user.fullName}</b> Requested to Return the book ${book.title} 
+                         by ${book.author} to you`,
+               type: 'request',
+               book: bookId,
+          });
+          console.log("notification", notification);
+          await bookReturnRequest.save();
+          await notification.save();
+          return res.status(200).json({message: "Request to return book sent!!!"});
+     } catch (error) {
+          console.log("error:", error);
+          res.status(500).json({ message: "Internal Server Error", error: error.message });
+     }
+}
+
+export const approveReturnRequest = async (req, res) => {
+     try {
+          const userId = req.user._id.toString();
+          const user = await User.findById(userId);
+          if(!user) return res.status(400).json({message: "User not Found"});
+
+          const { action, notificationId } = req.body;
+          const notification = await Notification.findById(notificationId);
+          if (!notification) return res.status(404).json({ message: "Notification not found" });
+
+          const {from: borrowerId, bookId} = notification;
+          const borrower = await User.findById(borrowerId);
+          if(!borrower) return res.status(400).json({message: "User not Found"});
+          const book = await Books.findById(bookId);
+          if(!book) return res.status(400).json({message: "Book not Found"});
+
+          if(notification.type !== 'request') return res.status(400).json({message: "Invalid Request Type"});
+
+          const request = await BookRequest.findOne({from: borrower._id, to: userId, bookId: bookId, type: 'return'});
+          if(!request) return res.status(400).json({message: "Request not Found"});
+
+          if(action === 'approved'){
+               request.status = 'approved';
+               await request.save();
+
+               const notificationToBorrower = new Notification({
+                    from: userId,
+                    to: borrower._id,
+                    message: `<b>${user.fullName}</b> has approved your request to return the book ${book.title} by ${book.author}`,
+                    type: 'action',
+                    book: book._id,     
+               });
+               await notificationToBorrower.save();
+
+               notification.message = `You accepted the request to return the book ${book.title} by ${book.author}
+                                       from ${user.fullName}.The book has been added to your book collection`;
+               notification.type = 'action';
+               await notification.save();
+               return res.status(200).json({message: "Returned the book"});
+          } else if(action === 'declined'){
+               request.status = 'declined';  
+               await request.save();
+               notification.message = `You rejected the request to return the book ${book.title} by ${book.author}
+                                       from ${user.fullName}.`;
+               notification.type = 'action';
+               await notification.save();
+
+               const notificationToBorrower = new Notification({
+                    from: userId,
+                    to: borrower._id,
+                    message: `<b>${user.fullName}</b> has declined your request to return the book ${book.title} by ${book.author}`,
+                    type: 'action',
+                    book: book._id,     
+               });
+               await notificationToBorrower.save();
+               return res.status(200).json({message: "Declined the request"});
+          }
+     } catch (error) {
+          console.log("error:", error);
+          res.status(500).json({ message: "Internal Server Error", error: error.message });
+     }
+}
+
 export const borrowedBooks = async (req, res) => {
      try {
           const userId = req.user._id.toString();
@@ -263,16 +512,12 @@ export const borrowedBooks = async (req, res) => {
           .select('bookCollection')
           .populate('bookCollection')
           .exec();
-          console.log("getUserBookList", getUserBookList);
 
-          console.log("Populated bookCollection:", getUserBookList.bookCollection);
+          console.log("Populated borrowed bookCollection");
 
           const borrowedBookList = getUserBookList.bookCollection.filter(book => book.bookType === 'borrowedBook');
-          console.log("bookTitles", borrowedBookList);
-
-          getUserBookList.bookCollection.forEach(book => {
-               console.log('bookTypes', book.bookType);
-          });
+          const bookTitles = borrowedBookList.map(book => book.title);
+          console.log("bookTitles", bookTitles);
           
           res.status(200).json(borrowedBookList);
      } catch (error) {
@@ -292,16 +537,12 @@ export const lentBooks = async (req, res) => {
           .select('bookCollection')
           .populate('bookCollection')
           .exec();
-          console.log("getUserBookList", getUserBookList);
 
-          console.log("Populated bookCollection:", getUserBookList.bookCollection);
+          console.log("Populated lent bookCollection");
 
           const lentBookList = getUserBookList.bookCollection.filter(book => book.bookType === ('lentBook'));
-          console.log("bookTitles", lentBookList);
-
-          getUserBookList.bookCollection.forEach(book => {
-               console.log('bookTypes', book.bookType);
-          });
+          const bookTitles = lentBookList.map(book => book.title);
+          console.log("bookTitles", bookTitles);
           
           res.status(200).json(lentBookList);
      } catch (error) {
@@ -325,7 +566,7 @@ export const borrowBook = async (req, res) => {
                to: profileUser._id,
                message: `${user.fullName} Requested to Borrow the book ${book.title} 
                          by ${book.author} from you`,
-               type: 'bookRequest',
+               type: 'request',
                book: bookId,
           });
           await notification.save();

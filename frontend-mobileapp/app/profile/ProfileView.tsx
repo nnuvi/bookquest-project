@@ -5,6 +5,8 @@ import { Colors } from '@/constants/Colors';
 import { router } from 'expo-router';
 import api from '@/utils/api';
 import { useUser } from './getMe';
+import StatusBar from '@/components/common/StatusBar';
+import { HeaderText } from '@/components/common/HeaderTitle';
 
 type Book = {
   _id: string;
@@ -120,6 +122,8 @@ const ProfileView = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar />
+      <HeaderText text = {'Profile'}/>
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <View style={styles.imageContainer}>

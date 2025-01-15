@@ -5,7 +5,9 @@ import { Colors } from '@/constants/Colors'
 import { retroFont } from '@/utils/fontAdd'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/utils/api'
-import axios from 'axios'
+import Button from '@/components/common/Button'
+import LogoText from '@/components/common/LogoText'
+import { StatusBar } from 'expo-status-bar'
 
 
 const Page = () => {
@@ -29,9 +31,9 @@ const Page = () => {
                console.log('res data', res.data);
                console.log('status',res.status);
                if(res.status === 200) {
-                    router.push('../profile/Homepage');
+                  router.replace('../home');
                } else {
-                    alert('Invalid username or password');
+                  alert('Invalid username or password');
                }
           } catch (error) {
                console.error('Error during login:', error);
@@ -55,11 +57,8 @@ const Page = () => {
 
   return (
     <View style={styles.container}>
-            <View style={styles.logoContainer}>
-        <Text style={styles.title}>BookQuest</Text>
-      </View>
-      <View style={styles.space}></View>
-
+      <StatusBar style='auto' translucent={true} backgroundColor="transparent" />
+      <LogoText />
 
       <View style={styles.inputContainer}>
         <TextInput
@@ -83,9 +82,7 @@ const Page = () => {
         />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin} >
-        <Text style={styles.buttonText}>Log In</Text>
-      </TouchableOpacity>
+      <Button title="Login" onPress={handleLogin}></Button>
     </View>
   )
 }

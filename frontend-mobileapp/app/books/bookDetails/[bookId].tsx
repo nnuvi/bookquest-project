@@ -1,10 +1,12 @@
 import { Colors } from '@/constants/Colors';
 import api from '@/utils/api';
-import { useRoute } from '@react-navigation/native';
 import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router';
 //import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, Button, StyleSheet, TouchableOpacity} from 'react-native';
+import Toast from 'react-native-toast-message';
+import { HeaderText } from '@/components/common/HeaderTitle';
+import { StatusBar } from 'expo-status-bar';
 
 type Props = {
   route: {
@@ -61,7 +63,7 @@ export default function BookDetails() {
   }
 
   const [username, setUsername] = useState('None');
-  const getUsername = async (borrowedBy) => {
+  const getUsername = async (borrowedBy: string) => {
     if (!borrowedBy) {
       console.error('No borrowedBy provided');
       return;
@@ -86,35 +88,51 @@ export default function BookDetails() {
     getBookDetails();
     console.log('Books after setting state detail:', book);
   }, []);
-<Text style={styles.title}></Text>
+  <Text style={styles.title}></Text>
+
+    const showToast = () => {
+      Toast.show({
+        type: 'success',
+        text1: 'Hello!',
+        text2: 'This is a success message 👋',
+        position: 'top',
+      });
+    };
   return (
     <View style={styles.container}>
-    <View style={styles.firstContainer}>
-    <View style={styles.imgContainer}>
-      <Image source={{ uri: 'book_image_url' }} style={styles.bookImage} />
-    </View>
-    <View style={styles.detailsContainer}>
-      <Text style={styles.bookTitle}>{book?.title || 'N/A'}</Text>
-      <Text style={styles.bookAuthor}>by {book?.author.join(', ') || 'N/A'}</Text>
-      <Text style={styles.bookAuthor}>Genre: {book?.genre.join(', ') || 'N/A'}</Text>
-      <Text>
-      <Text style={styles.title}>Pages:</Text>
-      <Text style={styles.bookDetails}> {book?.pageCount || 'N/A'}</Text>
-      </Text>
-      <Text>
-      <Text style={styles.title}>ISBN:</Text>
-      <Text style={styles.bookDetails}> {book?.isbn || 'N/A'}</Text>
-      </Text>
-      <Text>
-      <Text style={styles.title}>Publisher:</Text>
-      <Text style={styles.bookDetails}> {book?.publisher || 'N/A'}</Text>
-      </Text>
-    </View>
-    </View>
-    <View style={styles.descriptionContainer}>
-      <Text style={styles.description}>Description: {book?.description || 'N/A'}</Text>
-    </View>
+      <StatusBar style='auto' translucent={true} backgroundColor="transparent" />
+      <HeaderText text = {'Book Information'}/>
+      <View style={styles.subContiner}>
+        <View style={styles.firstContainer}>
+          <View style={styles.imgContainer}>
+            <Image source={{ uri: 'book_image_url' }} style={styles.bookImage} />
+          </View>
+          <View style={styles.detailsContainer}>
+            <Text style={styles.bookTitle}>{book?.title || 'N/A'}</Text>
+            <Text style={styles.bookAuthor}>by {book?.author.join(', ') || 'N/A'}</Text>
+            <Text style={styles.bookAuthor}>Genre: {book?.genre.join(', ') || 'N/A'}</Text>
+            <Text>
+              <Text style={styles.title}>Pages:</Text>
+              <Text style={styles.bookDetails}> {book?.pageCount || 'N/A'}</Text>
+            </Text>
+            <Text>
+              <Text style={styles.title}>ISBN:</Text>
+              <Text style={styles.bookDetails}> {book?.isbn || 'N/A'}</Text>
+            </Text>
+            <Text>
+              <Text style={styles.title}>Publisher:</Text>
+              <Text style={styles.bookDetails}> {book?.publisher || 'N/A'}</Text>
+            </Text>
+          </View>
+        </View>
+      <View style={styles.descriptionContainer}>
+        <Text style={styles.description}>Description: {book?.description || 'N/A'}</Text>
+      </View>
     <Text>
+    {/* <TouchableOpacity style={styles.button}  onPress={showToast} >
+        <Text style={styles.buttonText}>Connect</Text>
+        <Toast />
+    </TouchableOpacity> */}
     <Text style={styles.title}>Borrowed By:</Text>
       <Text style={styles.bookDetails}> {username === 'None'? 'None' : `@${username}`}</Text>
     </Text>
@@ -124,17 +142,22 @@ export default function BookDetails() {
       <TouchableOpacity style={styles.button}  onPress={() => {}} >
         <Text style={styles.buttonText}>Borrow</Text>
       </TouchableOpacity>*/}
+      </View>
     </View>
+    
   );
 }
 
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    flexDirection: 'column',
-    padding: 16, 
-    alignItems: 'center', 
     backgroundColor: Colors.background 
+  },
+  subContiner: {
+    flex: 1,
+    flexDirection: 'column',
+    padding: 16,
+    alignItems: 'center',
   },
   bookImage: { 
     width: '100%', 

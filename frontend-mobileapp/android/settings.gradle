@@ -44,7 +44,7 @@ if (getRNMinorVersion() >= 75) {
   }
 }
 
-rootProject.name = 'frontend-mobileapp'
+rootProject.name = 'BookQuest'
 
 dependencyResolutionManagement {
   versionCatalogs {

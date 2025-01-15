@@ -18,7 +18,7 @@ const requestBookSchema = new mongoose.Schema({
      },
      type: {
           type: String,
-          enum: ['borrow', 'return', 'lent'],
+          enum: ['borrow', 'return'],
           required: true,
      },
      borrowedDate: {
@@ -27,7 +27,7 @@ const requestBookSchema = new mongoose.Schema({
      },
      status: {
           type: String,
-          enum: ['requested', 'accepted', 'declined'],
+          enum: ['requested', 'approved', 'declined'],
           default: 'requested',
      }
 }, {timestamps: true});

@@ -1,8 +1,10 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import React from 'react'
 import { useRouter } from 'expo-router'
 import { Colors } from '@/constants/Colors'
 import { useFonts } from 'expo-font'
+import LogoText from '@/components/common/LogoText'
+import StatusBar from '@/components/common/StatusBar'
 
 const Page = () => {
   const router = useRouter();
@@ -17,9 +19,8 @@ const Page = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Text style={styles.title}>BookQuest</Text>
-      </View>
+      <StatusBar />
+      <LogoText />
       <View style={styles.authButtons}>
         <TouchableOpacity style={styles.button} onPress={() => router.push('./auth/login')}>
           <Text style={styles.buttonText}>Log In</Text>
