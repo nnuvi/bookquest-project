@@ -5,8 +5,9 @@ import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-rou
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, Button, StyleSheet, TouchableOpacity} from 'react-native';
 import Toast from 'react-native-toast-message';
-import { HeaderText } from '@/components/common/HeaderTitle';
-import { StatusBar } from 'expo-status-bar';
+import { HeaderTitle } from '@/components/common/HeaderTitle';
+import StatusBar from '@/components/common/StatusBar';
+import DropdownModal from '@/components/common/DropdownModal';
 
 type Props = {
   route: {
@@ -33,9 +34,10 @@ export default function BookDetails() {
   //const route = useRoute();
   //const { bookId } = route.params;
   const [book, setBook] = useState<Book | null>(null); 
-
-  //const router = useRouter();
   const { bookId } = useGlobalSearchParams< {bookId?: string} >();
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const options = ['Option 1', 'Option 2', 'Option 3'];
 
 
   //const router = useRouter();
@@ -88,7 +90,22 @@ export default function BookDetails() {
     getBookDetails();
     console.log('Books after setting state detail:', book);
   }, []);
-  <Text style={styles.title}></Text>
+
+  const handleOptionActions = (option: string) => {
+    switch (option) {
+      case 'Option 1':
+        console.log('Invalid option');
+      break;
+      case 'Option 2':
+        console.log('Invalid option');
+      break;
+      case 'Option 3':
+        console.log('Invalid option');
+      break;
+      default:
+        console.log('Invalid option');
+    }
+  }
 
     const showToast = () => {
       Toast.show({
@@ -100,8 +117,20 @@ export default function BookDetails() {
     };
   return (
     <View style={styles.container}>
-      <StatusBar style='auto' translucent={true} backgroundColor="transparent" />
-      <HeaderText text = {'Book Information'}/>
+      <StatusBar/>
+      <HeaderTitle 
+        text = {'Book Information'} 
+        threeDotsVisible = {true} 
+        onPress={() => {setModalVisible(true)}}
+      />
+
+      <DropdownModal
+          visible={modalVisible}
+          options={options}
+          onSelect={(option) => handleOptionActions(option)}
+          onClose={() => setModalVisible(false)}
+        />
+
       <View style={styles.subContiner}>
         <View style={styles.firstContainer}>
           <View style={styles.imgContainer}>
@@ -225,5 +254,3 @@ const styles = StyleSheet.create({
     color: Colors.choco
   }
 });
-
-

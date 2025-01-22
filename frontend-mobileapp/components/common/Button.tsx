@@ -1,7 +1,12 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-const Button = ({ title, onPress }: { title: string; onPress: () => void }) => {
+interface ErrorModalProps {
+  title: string;
+  onPress?: () => void;
+}
+
+const Button = ({ title, onPress }: ErrorModalProps) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <Text style={styles.text}>{title}</Text>

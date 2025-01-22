@@ -3,8 +3,8 @@ import { View, Text,TouchableOpacity, FlatList, Image, StyleSheet, SafeAreaView}
 import { Colors } from '@/constants/Colors';
 import api from '@/utils/api';
 import StatusBar from '@/components/common/StatusBar';
-import { HeaderText } from '@/components/common/HeaderTitle';
-// import { SafeAreaView } from 'react-native-safe-area-context';
+import { HeaderTitle } from '@/components/common/HeaderTitle';
+
 type User = {
      _id: string;
      fullName: string;
@@ -30,9 +30,7 @@ const NotificationScreen: React.FC = () => {
           console.log('noti before api');
           const res = await api.get("/notifications/");
           const data = await res.data;
-          console.log('noti data', data);
-          //const notificationId = data._id;
-          //console.log('noti id', notificationId);
+          console.log('noti data');
           setNotifications(data);
           setUnseenCount(data.length);
           console.log('noti after api')
@@ -46,10 +44,9 @@ const NotificationScreen: React.FC = () => {
      try {
           console.log('res action: ', action);
           const res = await api.put(`/books/approveDecline/`, {action, notificationId});
-          console.log('res', res);
-          console.log('res status', res.status);
+          console.log('send res');
+          console.log('send res status', res.status);
           await getAllNotifications();
-          //console.log('res data', res.data);
      } catch (error) {
           console.error(error);
      }
@@ -58,7 +55,7 @@ const NotificationScreen: React.FC = () => {
   const getReminer = async () => {
      try {
           const res = await api.get('/notifications/reminder');
-          console.log('res reminder', res);
+          console.log('res reminder');
           console.log('res reminder status', res.status);
      } catch (error) {
           console.error(error);
@@ -104,7 +101,7 @@ const NotificationScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <StatusBar />
-      <HeaderText text = {'Notification'}/>
+      <HeaderTitle text = {'Notification'}/>
       <View style={styles.containerBody}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Unread Notifications</Text>

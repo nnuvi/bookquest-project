@@ -1,5 +1,5 @@
 import { Colors } from '@/constants/Colors';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Modal,
   View,
@@ -7,16 +7,20 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
+  TextStyle,
+  ViewStyle,
 } from 'react-native';
 
 type DropdownModalProps = {
      visible: boolean; // Type for visibility
      options: string[]; // Array of strings for dropdown options
+     top?: number;
      onSelect: (option: string) => void; // Callback for when an option is selected
      onClose: () => void; // Callback for closing the modal
 };
 
-const DropdownModal = ({ visible, options, onSelect, onClose } : DropdownModalProps) => {
+const DropdownModal = ({ visible, options, top = 40, onSelect, onClose } : DropdownModalProps) => {
+  const style: TextStyle = { top };
   return (
     <Modal
       animationType='none'
@@ -24,7 +28,7 @@ const DropdownModal = ({ visible, options, onSelect, onClose } : DropdownModalPr
       visible={visible}
       onRequestClose={onClose}
     >
-      <TouchableOpacity style={styles.overlay} onPress={onClose}>
+      <TouchableOpacity style={[styles.overlay, style as ViewStyle]} onPress={onClose}>
         <View style={styles.modalContent}>
           <FlatList
             data={options}
@@ -54,9 +58,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'flex-end',
-    //position: 'relative',
-    top: 60,
-    
   },
   modalContent: {
     width: '50%',
@@ -66,7 +67,6 @@ const styles = StyleSheet.create({
   },
   option: {
     padding: 15,
-    //borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
   optionText: {

@@ -1,22 +1,37 @@
 import React from "react";
-import { Text, StyleSheet, TextStyle, View} from 'react-native';
+import { Text, StyleSheet, TextStyle, View, TouchableOpacity} from 'react-native';
 import { Colors } from "@/constants/Colors";
 import { SafeAreaView } from "react-native-safe-area-context";
-//import { SafeAreaView } from "react-native";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 type HeaderTextProps = {
      text: string;
      backgroundColor?: string;
      color?: string;
      fontSize?: number;
+     threeDotsVisible?: boolean;
+     onPress?: () => void;
 }
 
-export const HeaderText = ({ text, color = Colors.background, fontSize = 26} : HeaderTextProps) => {
+export const HeaderTitle = ({ 
+     text, 
+     color = Colors.background, 
+     fontSize = 26, 
+     threeDotsVisible= false, 
+     onPress
+} : HeaderTextProps) => {
      const style: TextStyle = {color, fontSize}
 
      return(
           <SafeAreaView style={styles.container}>
+               <View style={styles.subcontainer}>
                <Text style={[styles.headerText, style]}>{text}</Text>
+               {threeDotsVisible && (
+                    <TouchableOpacity onPress={onPress}>
+                      <MaterialCommunityIcons name="dots-vertical" size={24} color="black" />
+                    </TouchableOpacity>
+               )}
+               </View>
           </SafeAreaView>
      );
 }
@@ -33,7 +48,11 @@ const styles = StyleSheet.create({
           fontWeight: 'bold',
           textAlign: 'left',
           marginBottom: 10,
-        },    
+        },  
+        subcontainer: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+        }  
 });
  
-//export default HeaderText;

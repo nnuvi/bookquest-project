@@ -24,7 +24,6 @@ const LogoText = ({ color = Colors.choco, fontSize = 55, textAlign = 'center' }:
 const styles = StyleSheet.create({
   logoText: {
     fontFamily: 'CustomFont', 
-    //textAlign: 'center',
   },
   logoContainer: {
      alignItems: 'center',

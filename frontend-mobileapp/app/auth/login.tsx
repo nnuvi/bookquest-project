@@ -8,14 +8,15 @@ import api from '@/utils/api'
 import Button from '@/components/common/Button'
 import LogoText from '@/components/common/LogoText'
 import { StatusBar } from 'expo-status-bar'
+import ErrorMessageModal from '@/components/common/ErrorMessageModal'
 
 
 const Page = () => {
     
      const [loading, setLoading] = useState(false);
-     const [error, setError] = useState(null);
-     const [username, setUsername] = useState('');
-     const [password, setPassword] = useState('');
+     //const [error, setError] = useState(false);
+     const [errorMessage, setErrorMessage] = useState<string>('');
+     const [isErrorVisible, setErrorVisible] = useState<boolean>(false);
      const [formData, setFormData] = useState({
 		  username: "",
 		  password: "",
@@ -26,18 +27,18 @@ const Page = () => {
      const login = async (username: string, password: string ) => {
           try {
                console.log('fdata', { username, password });
-               
                const res = await api.post("/auth/login", { username, password });
                console.log('res data', res.data);
                console.log('status',res.status);
                if(res.status === 200) {
                   router.replace('../home');
                } else {
-                  alert('Invalid username or password');
+                console.log('Invalid username or password');
                }
-          } catch (error) {
-               console.error('Error during login:', error);
-               alert('Invalid username or password');
+          } catch (error:any) {
+            setErrorVisible(true);
+            setErrorMessage('Invalid username or password');
+            console.error('Error during login:', error);
           }
      }
 
@@ -83,6 +84,13 @@ const Page = () => {
       </View>
 
       <Button title="Login" onPress={handleLogin}></Button>
+      {isErrorVisible && (
+        <ErrorMessageModal 
+          visible={isErrorVisible}  
+          onClose={() => setErrorVisible(false)}
+          message={errorMessage} 
+          />
+      )}
     </View>
   )
 }

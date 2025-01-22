@@ -97,7 +97,6 @@ const HomeScreen = () => {
     <View style={styles.container}>
       <StatusBar />
       {/* Bar at the top */}
-      
       <View style={styles.bar}>
         <View style={styles.headerItems}>
           <LogoText color= {Colors.background} fontSize={40} textAlign = 'left'/>
@@ -106,10 +105,10 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
 
-        
         <DropdownModal
           visible={modalVisible}
           options={options}
+          top= {60}
           onSelect={(option) => handleOptionActions(option)}
           onClose={() => setModalVisible(false)}
         />

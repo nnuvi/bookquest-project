@@ -21,7 +21,10 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.nnuvi.frontendmobileapp",
-      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"],
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
       "newArchEnabled": true
     },
     "androidStatusBar": {
@@ -43,7 +46,8 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
           "recordAudioAndroid": true
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
@@ -54,5 +58,7 @@
       }
     }
   },
-  "permissions": ["CAMERA"]
+  "permissions": [
+    "CAMERA"
+  ]
 }

@@ -11,5 +11,6 @@ export const Colors = {
   gray: '#ccc',
   choco: '#433530',
   savoy : '#6A4E37',
-  blue: '#0047AB'
+  blue: '#0047AB',
+  transparent: 'rgba(0, 0, 0, 0.5)',
 };

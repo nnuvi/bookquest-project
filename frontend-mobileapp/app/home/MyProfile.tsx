@@ -8,6 +8,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ListItemsSkeleton from '@/components/skeleton/ListItemsSkeleton';
 
 type Book = {
   _id: string;
@@ -29,9 +30,10 @@ type User = {
   username: string | null;
   bio: string | null;
 }
-
+ 
 const ProfileScreen = () => {
   const route = useRouter();
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('list');
   const [bookCollection, setBookCollection] = useState<Book[]>([]); // Array of books
   const [lentBooks, setLentBooks] = useState<Book[]>([]); // Array of lent books
@@ -75,12 +77,15 @@ const ProfileScreen = () => {
   
   const getBookCollection = async () => {
     try {
+      setLoading(true);
       const res = await api.get('/books/myBooks');
       const data: Book[] = res.data.bookCollection;
       console.log("bc current book data: ", data.map(books=>books.title));
       setBookNo(res.data.bookCollection.length);
       setBookCollection(data);
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   }
@@ -134,7 +139,12 @@ const ProfileScreen = () => {
   const renderBookItem = ({ item }: { item: Book }) => (
     <View style={styles.bookItem}>
       <View style={styles.bookImage} />
-      <TouchableOpacity style={styles.bookDetails} onPress={() => { router.push(`/books/BookDetails?bookId=${item._id.toString()}`)}}>
+      <TouchableOpacity 
+        style={styles.bookDetails} 
+        onPress={() => router.push({
+          pathname: '/books/bookDetails/[bookId]',
+          params: { bookId: item._id },
+      })}>
         <Text style={styles.bookTitle}>{item.title}</Text>
         <Text style={styles.bookAuthor}>{item.author.join(", ")}</Text>
         {item.bookType !== 'myBook' && (
@@ -282,17 +292,22 @@ const ProfileScreen = () => {
       </View>
 
       {activeTab === 'list' && (
+        // loading ? (
+        //   <ListItemsSkeleton />
+        // ) : (
+
+        // )
         <FlatList
-          data={bookCollection}
-          renderItem={renderBookItem}
-          keyExtractor={(item) => item._id.toString()}
-          contentContainerStyle={styles.bookList}
-          ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>
-            No books available.
-          </Text>}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false} 
-        />
+        data={bookCollection}
+        renderItem={renderBookItem}
+        keyExtractor={(item) => item._id.toString()}
+        contentContainerStyle={styles.bookList}
+        ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>
+          No books available.
+        </Text>}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false} 
+      />
       )}
 
       {activeTab === 'borrowed' && (

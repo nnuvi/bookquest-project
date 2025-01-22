@@ -4,11 +4,11 @@ import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import api from '@/utils/api';
 import { router } from 'expo-router';
-//import {userId, UserProvider } from './getMe'
 import { useUser } from '../profile/getMe'
 import Octicons from '@expo/vector-icons/Octicons';
 import StatusBar from '@/components/common/StatusBar';
-import { HeaderText } from '@/components/common/HeaderTitle';
+import { HeaderTitle } from '@/components/common/HeaderTitle';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 type User = {
   _id: number;
@@ -33,13 +33,21 @@ interface SearchProps {
   onBorrow: (id: string) => void;
 }
 
-/*/const Search: React.FC<SearchProps> = ({ results, onConnect, onBorrow }) => {*/
 const Search = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  //const navigation = useNavigation();
   const [debouncedQuery, setDebouncedQuery] = useState(query);
-  const { userId, formData } = useUser();
+  const [user, setUser] = useState<User>();
+
+  const {data:authUser} = useQuery<User>({queryKey: ['authUser']});
+  const queryClient = useQueryClient();
+  
+  useEffect(() => {
+    if (authUser) {
+      setUser(authUser);
+      console.log("authUser", user?.username);
+    }
+  }, [authUser]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -61,13 +69,8 @@ useEffect(() => {
   handleSearch(debouncedQuery);
 }, [debouncedQuery])
 
-
-  // const handleProfilePress = (username: string) => {
-  //   navigation.navigate('ProfileView', { username });
-  // };
   const handleSearch = async (text: string) => {
     console.log("res text:", text);
-    //setQuery(text);
     if (text.length < 3) {
       setResults([]);
       return;
@@ -78,20 +81,23 @@ useEffect(() => {
       console.log("res:", res);
       const data = res.data;
       console.log(data);
-      const filteredResults = data.filter((user) => user._id !== userId);
+      const filteredResults = data.filter((user: { _id: any; }) => user._id !== authUser?._id);
       setResults(filteredResults);
     } catch (error) {
       console.error(error);
     }
   }
 
-  //const userId = UserProvider();
-  console.log("userId: ", userId);
+  console.log("authuser Id: ", authUser?._id);
 
   const renderItem = ({ item }: { item: User }) => (
     <TouchableOpacity 
-    style={styles.resultContainer}
-    onPress={() => router.push(`/profile/ProfileView?profileId=${item._id}`)}>
+      style={styles.resultContainer}
+      onPress={() => router.push({
+        pathname: '/profile/ProfileView/[profileId]',
+        params: { profileId: item._id },
+      })}
+    >
       <Image
       source={{ uri: 'https://via.placeholder.com/100' }}
       style={styles.bookImage}
@@ -171,17 +177,19 @@ useEffect(() => {
     
     <View style={styles.container}>
       <StatusBar />
-      <HeaderText text= {'Search'}/>
+      <HeaderTitle text= {'Search'}/>
       <View style={styles.containerBody}>
       <View style={styles.searchBar}>
-        <TouchableOpacity style={styles.searchIcon} onPress={() => router.push('/profile/ProfileView')}>
+        <TouchableOpacity 
+          style={styles.searchIcon} 
+          onPress={() => router.push('../profile/ProfileView')}
+        >
           <Octicons name="search" size={24} color='black' />
         </TouchableOpacity>
         <TextInput
           style={styles.input}
           placeholder="Search"
           placeholderTextColor= {Colors.text}
-          //value={query}
           onChangeText={setQuery}
         />
       </View>
@@ -189,7 +197,10 @@ useEffect(() => {
       data={results}
       renderItem={renderItem}
       keyExtractor={(item => item._id.toString())}
-      ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>No search result available.</Text>}
+      ListEmptyComponent={
+        <Text style={{ textAlign: 'center', marginTop: 20 }}>
+          No search result available.
+        </Text>}
       />
     </View>
     </View>
@@ -227,7 +238,6 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: 'bold',
     color: Colors.background,
-    //fontFamily: 'CustomFont',
     textAlign: 'left',
     marginBottom: 10,
   },
