@@ -17,7 +17,7 @@ dotenv.config();
 const app = express();
 
 const corsOptions ={
-     origin:'http://localhost:8081', 
+     origin:['http://localhost:8081', 'https://bookquestapplication.netlify.app'], 
      credentials:true,            
      optionSuccessStatus:200,
      methods: ['GET', 'POST', 'PUT'],
