@@ -6,8 +6,6 @@ export const generateTokenAndSetCookie = (userID, res) => {
                expiresIn:'15d'
           });
      
-          console.log('token in gent: ', token, ' for userId: ', userID);
-     
           res.cookie("jwt", token, {
                httpOnly: true,
                secure: process.env.NODE_ENV === "development",

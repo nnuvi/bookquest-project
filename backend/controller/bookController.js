@@ -193,7 +193,7 @@ export const imageImport = async (req, res) => {
 export const getMyBooks = async (req, res) => {
      try {
           const userId = req.user._id.toString();
-          console.log( req.user );
+          //console.log( req.user );
           const user = await User.findById(userId);
           if(!user) return res.status(400).json({message: "User not Found"});
 
@@ -235,7 +235,7 @@ export const getUserBookList = async (req, res) => {
 export const getBookDetails = async (req, res) => {
      try {
           const userId = req.user._id.toString();
-          console.log( req.user );
+          //console.log( req.user );
           const bookId = req.params.id;
           console.log( bookId  );
           const user = await User.findById(userId);
@@ -504,7 +504,7 @@ export const approveReturnRequest = async (req, res) => {
 export const borrowedBooks = async (req, res) => {
      try {
           const userId = req.user._id.toString();
-          console.log( req.user );
+          //console.log( req.user );
           const user = await User.findById(userId);
           if(!user) return res.status(400).json({message: "User not Found"});
 
@@ -529,7 +529,7 @@ export const borrowedBooks = async (req, res) => {
 export const lentBooks = async (req, res) => {
      try {
           const userId = req.user._id.toString();
-          console.log( req.user );
+          //console.log( req.user );
           const user = await User.findById(userId);
           if(!user) return res.status(400).json({message: "User not Found"});
 
