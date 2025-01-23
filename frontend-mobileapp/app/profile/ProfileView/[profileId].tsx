@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { router } from 'expo-router';
+import { router, useGlobalSearchParams } from 'expo-router';
 import api from '@/utils/api';
-import { useUser } from '../getMe'
-import StatusBar from '@/components/common/StatusBar';
 import { HeaderTitle } from '@/components/common/HeaderTitle';
 import DropdownModal from '@/components/common/DropdownModal';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -32,9 +29,7 @@ type User = {
 }
 
 const ProfileView = () => {
-  const route = useRoute();
-  const { profileIds } = route.params; 
-  const navigation = useNavigation();
+  const { profileId } = useGlobalSearchParams< {profileId?: string} >();
   const [isConnected, setIsConnected] = useState(false);
   const [ bookCollection, setBookCollection ] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);

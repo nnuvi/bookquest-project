@@ -1,9 +1,8 @@
 import { Colors } from '@/constants/Colors';
 import api from '@/utils/api';
-import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router';
-//import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useGlobalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, Button, StyleSheet, TouchableOpacity} from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { HeaderTitle } from '@/components/common/HeaderTitle';
 import StatusBar from '@/components/common/StatusBar';

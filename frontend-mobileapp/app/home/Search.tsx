@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, FlatList,} 
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@/constants/Colors';
 import api from '@/utils/api';
-import { router } from 'expo-router';
+import { router, useGlobalSearchParams } from 'expo-router';
 import { useUser } from '../profile/getMe'
 import Octicons from '@expo/vector-icons/Octicons';
 import StatusBar from '@/components/common/StatusBar';
@@ -11,7 +11,7 @@ import { HeaderTitle } from '@/components/common/HeaderTitle';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 type User = {
-  _id: number;
+  _id: string;
   username: string;
   bio: string;
 }
