@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import Notification from "../model/notificationModel.js";
-import User from "../model/userModel.js";
-import Books from "../model/bookModel.js";
+import User from "../model/user.model.js";
+import Books from "../model/book.model.js";
 import moment from "moment";
 import { BookType } from "../types/types.js";
 
@@ -55,7 +55,7 @@ export const reminderNotification = async (req: Request, res: Response) => {
   }
 
   const borrowedBooks = userBooks.bookCollection.filter(
-    (book) => book.bookType === "borrowedBook"
+    (book) => book.bookType === "borrowedBook",
   );
 
   const today = moment();

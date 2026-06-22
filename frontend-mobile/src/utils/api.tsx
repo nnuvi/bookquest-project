@@ -1,0 +1,23 @@
+import axios from 'axios';
+import { Platform } from 'react-native';
+
+const apiUrl = Platform.OS === 'web' ? 'http://localhost:5555/api' : 'http://192.168.0.104:5555/api';
+// const apiUrl = 'https://bookquest-backend.onrender.com/api';
+
+export const api = axios.create({
+  baseURL: apiUrl, 
+  responseType: 'json',
+  withCredentials: true,
+});
+
+api.interceptors.response.use(
+     response => response,
+     error => {
+      if (error.response) {
+        console.error('API error response:', error.response.status, error.response.data);
+      } else {
+        console.error('API error without response:', error.message);
+      }
+      return Promise.reject(error);
+     }
+);

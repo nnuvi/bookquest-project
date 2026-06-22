@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import User from "../model/userModel.js";
-import Books, { BookSchemaType } from "../model/bookModel.js";
+import User from "../model/user.model.js";
+import Books, { BookSchemaType } from "../model/book.model.js";
 import Notification from "../model/notificationModel.js";
 import BookRequest from "../model/bookRequestModel.js";
 import BorrowBooks from "../model/borrowLendModel.js";
@@ -427,10 +427,10 @@ export const returnBookRequest = async (req: Request, res: Response) => {
   const bookOwner = await User.findById(BorrowBookInfo.borrowedFrom);
 
   if (!bookOwner) {
-  return res.status(404).json({
-    message: "Book owner not found",
-  });
-}
+    return res.status(404).json({
+      message: "Book owner not found",
+    });
+  }
 
   const requestSent = await BookRequest.findOne({
     from: userId,
@@ -584,9 +584,10 @@ export const borrowBook = async (req: Request, res: Response) => {
   if (!user) return res.status(400).json({ message: "User not Found" });
   const profileUser = await User.findById(profileUserId); //get visiting profile id
   const book = await Books.findById(bookId); //get the book
-  if (!profileUser || !book) return res.status(400).json({ message: "User or Book not Found" });
+  if (!profileUser || !book)
+    return res.status(400).json({ message: "User or Book not Found" });
   const isAlreadyBookExist = user.bookCollection.some(
-    (id) => id.toString() === book._id.toString()
+    (id) => id.toString() === book._id.toString(),
   ); //book exists
   if (isAlreadyBookExist)
     return res.status(400).json({ message: "Book already exist" });
@@ -603,10 +604,7 @@ export const borrowBook = async (req: Request, res: Response) => {
   res.status(200).json({ message: "request to borrow book successful!!!" });
 };
 
-export const approveDeclineBorrowBook = async (
-  req: Request,
-  res: Response
-) => {
+export const approveDeclineBorrowBook = async (req: Request, res: Response) => {
   try {
     const userId = req.user?._id;
 
@@ -679,7 +677,7 @@ export const approveDeclineBorrowBook = async (
       }
 
       const alreadyExists = borrower.bookCollection.some(
-        (id) => id.toString() === bookId.toString()
+        (id) => id.toString() === bookId.toString(),
       );
 
       if (alreadyExists) {
@@ -768,7 +766,7 @@ export const returnBook = async (req: Request, res: Response) => {
   if (!originalBookInfo)
     return res.status(400).json({ message: "Original Book not Found" });
   const borrowedFromUser = await User.findOne({
-    bookCollection: bookInfo._id
+    bookCollection: bookInfo._id,
   });
   if (!borrowedFromUser)
     return res.status(400).json({ message: " BUser not Found" });

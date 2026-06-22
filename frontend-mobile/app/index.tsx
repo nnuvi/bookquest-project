@@ -1,84 +1,33 @@
-import { StyleSheet, Text, TouchableOpacity, View} from 'react-native'
-import React from 'react'
-import { useRouter } from 'expo-router'
-import { Colors } from '@/constants/Colors'
-import { useFonts } from 'expo-font'
-import LogoText from '@/components/common/LogoText'
-import StatusBar from '@/components/common/StatusBar'
+import { useEffect } from "react";
+import { useRouter } from "expo-router";
+import { useAuthStore } from "@/store/auth.store";
+import PageLoadingIndicator from "@/components/common/PageLoadingIndicator";
+import { View } from "react-native";
+import { useAuth } from "@/hooks/useAuth";
 
-const Page = () => {
+export default function Index() {
   const router = useRouter();
 
-  const [fontsLoaded] = useFonts({
-    'CustomFont': require('../assets/fonts/Retrograde.ttf'),
-  });
+  const user = useAuthStore((s) => s.user);
+  const loading = useAuthStore((s) => s.loading);
 
-  if (!fontsLoaded) {
-    return null; // Optional: Show a loading spinner here
+  useEffect(() => {
+    if (loading) return;
+
+    if (user) {
+      router.replace("/(app)/(tabs)/Homepage");
+    } else {
+      router.replace("/(auth)/landing");
+    }
+  }, [user, loading]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <PageLoadingIndicator />
+      </View>
+    );
   }
 
-  return (
-    <View style={styles.container}>
-      <StatusBar />
-      <LogoText />
-      <View style={styles.authButtons}>
-        <TouchableOpacity style={styles.button} onPress={() => router.push('./auth/login')}>
-          <Text style={styles.buttonText}>Log In</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button} onPress={() => router.push('./auth/signup')}>
-          <Text style={styles.buttonText}>Sign Up</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  )
+  return null;
 }
-
-export default Page
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 50,
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 55,
-    color: Colors.choco,
-    fontFamily: 'CustomFont', 
-    
-  },
-  authButtons: {
-    width: '80%',
-  },
-  button: {
-    backgroundColor: '#F1F1F1',
-    paddingVertical: 15,
-    borderRadius: 25,
-    marginVertical: 10,
-    alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: 18,
-    color: '#000',
-  },
-  accountText: {
-    marginTop: 20,
-    fontSize: 14,
-    color: '#FFFFFF',
-  },
-  linkText: {
-    color: '#FFFFFF',
-    textDecorationLine: 'underline',
-  },
-})

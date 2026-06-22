@@ -4,13 +4,14 @@
     "strict": true,
     "ignoreDeprecations": "6.0",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      // "@*": ["./*"],
+      "@/*": ["./src/*"],
+      "@app/*": ["./app/*"]
     }
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "nativewind-env.d.ts"
   ]
 }
